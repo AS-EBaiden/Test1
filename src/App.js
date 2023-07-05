@@ -1,5 +1,6 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate, Link } from "react-router-dom";
+import Calendar from "./pages/Calendar";
 import Demo from "./pages/Demo";
 
 function HomePage() {
@@ -28,6 +29,11 @@ export default function App() {
             Demo Page
           </Link>
         </span>
+        <span style={{ padding: "1em" }}>
+          <Link to="/calendar" className="link">
+            Calendar
+          </Link>
+        </span>
         {/* <Link to="/applet" className="link">
           Applet
         </Link>
@@ -38,6 +44,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<HomePage />} />
         <Route path="/demo" element={<Demo />} />
+        <Route path="/calendar" element={<Calendar />} />
         {/* <Route path="/404" element={<NotFoundPage />} />
         <Route path="/apple">
           <Route path="/" element={<ApplePage />} />
