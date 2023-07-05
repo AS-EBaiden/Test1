@@ -1,1 +1,1 @@
-const categories = ["beauty", "health", "fitness"];
+export const categories = ["beauty", "health", "fitness"];
