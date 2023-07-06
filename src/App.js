@@ -2,23 +2,21 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate, Link } from "react-router-dom";
 import Calendar from "./pages/Calendar";
 import Demo from "./pages/Demo";
+import Emotion from "./pages/Emotion";
 
 function HomePage() {
   return <div className="page">🏠 Page</div>;
-}
-
-function NotFoundPage() {
-  return <div className="page">🧐 Page</div>;
-}
-
-function ApplePage() {
-  return <div className="page">🍎 Page</div>;
 }
 
 export default function App() {
   return (
     <BrowserRouter>
       <div>
+        <span style={{ padding: "1em" }}>
+          <Link to="/emotion" className="link">
+            Emotion
+          </Link>
+        </span>
         <span style={{ padding: "1em" }}>
           <Link to="/" className="link">
             Home
@@ -34,6 +32,7 @@ export default function App() {
             Calendar
           </Link>
         </span>
+
         {/* <Link to="/applet" className="link">
           Applet
         </Link>
@@ -45,6 +44,7 @@ export default function App() {
         <Route path="/" element={<HomePage />} />
         <Route path="/demo" element={<Demo />} />
         <Route path="/calendar" element={<Calendar />} />
+        <Route path="/emotion" element={<Emotion />} />
         {/* <Route path="/404" element={<NotFoundPage />} />
         <Route path="/apple">
           <Route path="/" element={<ApplePage />} />
