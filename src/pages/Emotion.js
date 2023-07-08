@@ -89,6 +89,8 @@ function Emotion() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [emotionLogs, setEmotionLogs] = useState([]);
 
+  const [isOpenEmotion, setIsOpenEmotion] = useState(false);
+
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
@@ -133,10 +135,19 @@ function Emotion() {
         />
       </div>
       <div>
-        <EmotionLogger
-          selectedDate={selectedDate}
-          onEmotionLog={handleEmotionLog}
-        />
+        <button>food tracker</button>
+        <button>craving tracker</button>
+        <button>period tracker</button>
+        <button>bowel tracker</button>
+        <button onClick={() => setIsOpenEmotion(true)}>emotion tracker</button>
+      </div>
+      <div>
+        {isOpenEmotion && (
+          <EmotionLogger
+            selectedDate={selectedDate}
+            onEmotionLog={handleEmotionLog}
+          />
+        )}
       </div>
       <div>
         {getEmotionLogsByDate(selectedDate).map((log, index) => (

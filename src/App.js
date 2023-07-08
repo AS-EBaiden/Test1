@@ -4,6 +4,7 @@ import Calendar from "./pages/Calendar";
 import Demo from "./pages/Demo";
 import Emotion from "./pages/Emotion";
 import Trackers from "./pages/Trackers";
+import "./App.css";
 
 function HomePage() {
   return <div className="page">🏠 Page</div>;
