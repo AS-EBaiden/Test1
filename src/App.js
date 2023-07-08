@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, Link } from "react-router-dom";
 import Calendar from "./pages/Calendar";
 import Demo from "./pages/Demo";
 import Emotion from "./pages/Emotion";
+import Trackers from "./pages/Trackers";
 
 function HomePage() {
   return <div className="page">🏠 Page</div>;
@@ -32,6 +33,11 @@ export default function App() {
             Calendar
           </Link>
         </span>
+        <span style={{ padding: "1em" }}>
+          <Link to="/trackers" className="link">
+            Trackers
+          </Link>
+        </span>
 
         {/* <Link to="/applet" className="link">
           Applet
@@ -45,6 +51,7 @@ export default function App() {
         <Route path="/demo" element={<Demo />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/emotion" element={<Emotion />} />
+        <Route path="/trackers" element={<Trackers />} />
         {/* <Route path="/404" element={<NotFoundPage />} />
         <Route path="/apple">
           <Route path="/" element={<ApplePage />} />
