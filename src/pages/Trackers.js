@@ -4,22 +4,19 @@ import "react-datepicker/dist/react-datepicker.css";
 import { Calendar as ReactCalendar } from "react-calendar";
 import "react-calendar/dist/Calendar.css";
 
-function ExpenseForm({ onExpenseSubmit, expense }) {
+function CravingForm({ onExpenseSubmit, expense, selectedDate }) {
   const [description, setDescription] = useState("");
   const [amount, setAmount] = useState("");
   const [date, setDate] = useState(new Date());
-  const [receipt, setReceipt] = useState("");
-  const [receiptPreview, setReceiptPreview] = useState("");
 
   useEffect(() => {
-    if (expense) {
-      setDescription(expense.description);
-      setAmount(expense.amount.toFixed(2));
-      setDate(new Date(expense.date));
-      setReceipt(expense.receipt);
-      setReceiptPreview(expense.receiptPreview);
-    }
-  }, [expense]);
+    setDate(new Date(selectedDate));
+    // if (expense) {
+    //   setDescription(expense.description);
+    //   setAmount(expense.amount.toFixed(2));
+    //   setDate(new Date(expense.date));
+    // }
+  }, [selectedDate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -28,23 +25,15 @@ function ExpenseForm({ onExpenseSubmit, expense }) {
       description,
       amount: parseFloat(amount),
       date,
-      receipt: receipt.name,
-      receiptPreview,
     };
     onExpenseSubmit(newExpense, expense ? expense.id : null);
     setDescription("");
     setAmount("");
     setDate(new Date());
-    setReceipt("");
-    setReceiptPreview("");
   };
 
-  const handleReceiptChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      setReceipt(file);
-      setReceiptPreview(URL.createObjectURL(file));
-    }
+  const changeHandler = (date) => {
+    setDate(date);
   };
 
   return (
@@ -64,79 +53,12 @@ function ExpenseForm({ onExpenseSubmit, expense }) {
       />
       <div>
         <label>Date:</label>
-        <DatePicker selected={date} onChange={(date) => setDate(date)} />
+        <DatePicker selected={date} onChange={changeHandler} />
       </div>
-      <div>
-        <label>Receipt:</label>
-        <input type="file" onChange={handleReceiptChange} />
-        {receiptPreview && (
-          <div>
-            <a href={receiptPreview} target="_blank" rel="noopener noreferrer">
-              <img
-                src={receiptPreview}
-                alt="Receipt Thumbnail"
-                width="80"
-                height="80"
-              />
-            </a>
-          </div>
-        )}
-      </div>
+
       <button type="submit">
         {expense ? "Update Expense" : "Add Expense"}
       </button>
-    </form>
-  );
-}
-
-function DigestiveForm({ onExpenseSubmit, expense }) {
-  const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
-  const [date, setDate] = useState(new Date());
-
-  useEffect(() => {
-    if (expense) {
-      setDescription(expense.description);
-      setAmount(expense.amount.toFixed(2));
-      setDate(new Date(expense.date));
-    }
-  }, [expense]);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    console.log("hello world");
-    // if (!description || !amount) return;
-    // const newExpense = {
-    //   description,
-    //   amount: parseFloat(amount),
-    //   date,
-    // };
-    // onExpenseSubmit(newExpense, expense ? expense.id : null);
-    // setDescription("");
-    // setAmount("");
-    // setDate(new Date());
-  };
-
-  return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        placeholder="Enter description..."
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
-      <input
-        type="number"
-        step="0.01"
-        placeholder="Enter amount..."
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-      />
-      <div>
-        <label>Date:</label>
-        <DatePicker selected={date} onChange={(date) => setDate(date)} />
-      </div>
-      <button type="submit">Add Expense</button>
     </form>
   );
 }
@@ -144,7 +66,7 @@ function DigestiveLogger({ selectedDate, onDigestiveLog }) {
   const [selectedDigestives, setSelectedDigestives] = useState([]);
 
   const handleDigestiveToggle = (digest) => {
-    if (selectedDigestives.find((e) => e.name === digest)) {
+    if (selectedDigestives.some((e) => e.name === digest)) {
       setSelectedDigestives(
         selectedDigestives.filter((e) => e.name !== digest)
       );
@@ -220,7 +142,7 @@ function EmotionLogger({ selectedDate, onEmotionLog }) {
   const [selectedEmotions, setSelectedEmotions] = useState([]);
 
   const handleEmotionToggle = (emotion) => {
-    if (selectedEmotions.find((e) => e.name === emotion)) {
+    if (selectedEmotions.some((e) => e.name === emotion)) {
       setSelectedEmotions(selectedEmotions.filter((e) => e.name !== emotion));
     } else {
       setSelectedEmotions([...selectedEmotions, { name: emotion, level: 0 }]);
@@ -290,10 +212,20 @@ function EmotionLogger({ selectedDate, onEmotionLog }) {
 function EmotionLog({ log }) {
   return (
     <div>
-      <h2>Log for {log.date.toDateString()}:</h2>
-      {log.emotions.map((emotion, index) => (
+      {log.emotions?.length > 0 && (
+        <h2>Emotion Log for {log.date?.toDateString()}:</h2>
+      )}
+      {log.emotions?.map((emotion, index) => (
         <p key={index}>
           {emotion.name} - Level: {emotion.level}
+        </p>
+      ))}
+      {log.cravings?.length > 0 && (
+        <h2>CravingsLog for {log.date?.toDateString()}:</h2>
+      )}
+      {log.cravings?.map((craving, index) => (
+        <p key={index}>
+          {craving.description} - Level: {craving.amount}
         </p>
       ))}
     </div>
@@ -303,25 +235,11 @@ function EmotionLog({ log }) {
 function Trackers() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [emotionLogs, setEmotionLogs] = useState([]);
-  const [isOpenEmotion, setIsOpenEmotion] = useState(false);
-  const [isOpenDigestive, setIsOpenDigestive] = useState(false);
+  const [activeTracker, setActiveTracker] = useState(null);
+  const [expenses, setExpenses] = useState([]);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
-  };
-
-  const handleEmotionLog = (date, emotions) => {
-    const existingLogIndex = emotionLogs.findIndex(
-      (log) => log.date.toDateString() === date.toDateString()
-    );
-
-    if (existingLogIndex !== -1) {
-      const updatedLogs = [...emotionLogs];
-      updatedLogs[existingLogIndex].emotions.push(...emotions);
-      setEmotionLogs(updatedLogs);
-    } else {
-      setEmotionLogs([...emotionLogs, { date, emotions }]);
-    }
   };
 
   const handleDigestiveLog = (date, emotions) => {
@@ -331,10 +249,88 @@ function Trackers() {
 
     if (existingLogIndex !== -1) {
       const updatedLogs = [...emotionLogs];
-      updatedLogs[existingLogIndex].emotions.push(...emotions);
+      if (!updatedLogs[existingLogIndex].emotions) {
+        updatedLogs[existingLogIndex].emotions = [...emotions];
+      } else {
+        updatedLogs[existingLogIndex].emotions.push(...emotions);
+      }
       setEmotionLogs(updatedLogs);
     } else {
       setEmotionLogs([...emotionLogs, { date, emotions }]);
+    }
+  };
+
+  const handleEmotionLog = (date, emotions) => {
+    const existingLogIndex = emotionLogs.findIndex(
+      (log) => log.date.toDateString() === date.toDateString()
+    );
+
+    if (existingLogIndex !== -1) {
+      const updatedLogs = [...emotionLogs];
+      if (!updatedLogs[existingLogIndex].emotions) {
+        updatedLogs[existingLogIndex].emotions = [...emotions];
+      } else {
+        updatedLogs[existingLogIndex].emotions.push(...emotions);
+      }
+      setEmotionLogs(updatedLogs);
+    } else {
+      setEmotionLogs([...emotionLogs, { date, emotions }]);
+    }
+  };
+  const handleCravingLog = (date, cravings) => {
+    const existingLogIndex = emotionLogs.findIndex(
+      (log) => log.date.toDateString() === date.toDateString()
+    );
+
+    if (existingLogIndex !== -1) {
+      const updatedLogs = [...emotionLogs];
+      if (!updatedLogs[existingLogIndex].cravings) {
+        updatedLogs[existingLogIndex].cravings = cravings;
+      } else {
+        updatedLogs[existingLogIndex].cravings.push(...cravings);
+      }
+      setEmotionLogs(updatedLogs);
+    } else {
+      setEmotionLogs([...emotionLogs, { date, cravings }]);
+    }
+  };
+
+  const handleExpenseSubmit = (expense, id) => {
+    if (id) {
+      const updatedExpenses = expenses.map((item) =>
+        item.id === id ? { ...item, ...expense } : item
+      );
+      setExpenses(updatedExpenses);
+    } else {
+      const existingLogIndex = emotionLogs.findIndex(
+        (log) => log.date.toDateString() === expense.date.toDateString()
+      );
+
+      if (existingLogIndex !== -1) {
+        const updatedLogs = [...emotionLogs];
+        if (!updatedLogs[existingLogIndex].cravings) {
+          updatedLogs[existingLogIndex].cravings = [expense];
+        } else {
+          updatedLogs[existingLogIndex].cravings.push(expense);
+        }
+        setEmotionLogs(updatedLogs);
+      } else {
+        setEmotionLogs([
+          ...emotionLogs,
+          {
+            date: expense.date,
+            cravings: [expense],
+          },
+        ]);
+      }
+
+      const newExpense = {
+        ...expense,
+        id: Date.now(),
+        date: expense.date.toString(),
+      };
+      const updatedExpenses = [...expenses, newExpense];
+      setExpenses(updatedExpenses);
     }
   };
 
@@ -354,21 +350,32 @@ function Trackers() {
   };
 
   const trackerFeatures = () => {
-    if (isOpenEmotion)
-      return (
-        <EmotionLogger
-          selectedDate={selectedDate}
-          onEmotionLog={handleEmotionLog}
-        />
-      );
-    else if (isOpenDigestive)
-      return (
-        <DigestiveLogger
-          selectedDate={selectedDate}
-          onDigestiveLog={handleDigestiveLog}
-        />
-      );
-    else return;
+    switch (activeTracker) {
+      case "emotion":
+        return (
+          <EmotionLogger
+            selectedDate={selectedDate}
+            onEmotionLog={handleEmotionLog}
+          />
+        );
+      case "craving":
+        return (
+          <CravingForm
+            onExpenseSubmit={handleExpenseSubmit}
+            selectedDate={selectedDate}
+            onCravingLog={handleCravingLog}
+          />
+        );
+      case "digestive":
+        return (
+          <DigestiveLogger
+            selectedDate={selectedDate}
+            onDigestiveLog={handleDigestiveLog}
+          />
+        );
+      default:
+        return null;
+    }
   };
 
   return (
@@ -384,137 +391,43 @@ function Trackers() {
         </div>
         <div className="right-side" style={{ padding: "2rem" }}>
           <div id="category">
-            <button className="category" style={{ background: "tomato" }}>
-              food tracker
-            </button>
-            <button className="category" style={{ background: "gold" }}>
-              craving tracker
-            </button>
-            <button className="category" style={{ background: "limegreen" }}>
-              period tracker
-            </button>
             <button
-              onClick={() => setIsOpenDigestive(true)}
-              className="category"
-              style={{ background: "dodgerblue" }}
-            >
-              Digestive tracker
-            </button>
-            <button
-              className="category"
+              className={`category ${
+                activeTracker === "emotion" ? "active" : ""
+              }`}
               style={{ background: "violet" }}
-              onClick={() => setIsOpenEmotion(true)}
+              onClick={() => setActiveTracker("emotion")}
             >
               emotion tracker
+            </button>
+            <button
+              className={`category ${
+                activeTracker === "craving" ? "active" : ""
+              }`}
+              style={{ background: "gold" }}
+              onClick={() => setActiveTracker("craving")}
+            >
+              craving tracker
+            </button>
+            <button
+              className={`category ${
+                activeTracker === "digestive" ? "active" : ""
+              }`}
+              style={{ background: "dodgerblue" }}
+              onClick={() => setActiveTracker("digestive")}
+            >
+              Digestive tracker
             </button>
           </div>
           <div>{trackerFeatures()}</div>
         </div>
       </div>
-
       <div>
         {getEmotionLogsByDate(selectedDate).map((log, index) => (
           <EmotionLog key={index} log={log} />
         ))}
       </div>
-    </div>
-  );
-}
-
-function Trackers1() {
-  const [expenses, setExpenses] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-  const [isOpenEmotion, setIsOpenEmotion] = useState(false);
-  const [isOpenDigestive, setIsOpenDigestive] = useState(false);
-
-  const handleExpenseSubmit = (expense, id) => {
-    if (id) {
-      const updatedExpenses = expenses.map((item) =>
-        item.id === id ? { ...item, ...expense } : item
-      );
-      setExpenses(updatedExpenses);
-    } else {
-      const newExpense = {
-        ...expense,
-        id: Date.now(),
-        // id: expenses.length + 1,
-        date: expense.date.toString(),
-      };
-      const updatedExpenses = [...expenses, newExpense];
-      setExpenses(updatedExpenses);
-    }
-  };
-
-  const handleDateChange = (date) => {
-    setSelectedDate(date);
-  };
-
-  const tileContent = ({ date }) => {
-    const formattedDate = date.toDateString();
-    const hasExpense = expenses.some(
-      (expense) => new Date(expense.date).toDateString() === formattedDate
-    );
-    return hasExpense ? <div className="expense-dot">•</div> : null;
-  };
-
-  const filteredExpenses = expenses.filter(
-    (expense) =>
-      new Date(expense.date).toDateString() === selectedDate.toDateString()
-  );
-
-  return (
-    <div className="App">
-      <div>
-        <p>Trackers</p>
-        <ExpenseForm onExpenseSubmit={handleExpenseSubmit} />
-        <div>
-          <div style={{ display: "inline-flex" }}>
-            <div style={{ padding: "2rem" }}>
-              <ReactCalendar
-                onChange={handleDateChange}
-                value={selectedDate}
-                tileContent={tileContent}
-              />
-            </div>
-            <div style={{ padding: "2rem" }}>
-              <div>
-                <button className="category" style={{ background: "tomato" }}>
-                  food tracker
-                </button>
-                <button className="category" style={{ background: "gold" }}>
-                  craving tracker
-                </button>
-                <button
-                  className="category"
-                  style={{ background: "limegreen" }}
-                >
-                  period tracker
-                </button>
-                <button
-                  onClick={() => setIsOpenDigestive(true)}
-                  className="category"
-                  style={{ background: "dodgerblue" }}
-                >
-                  Digestive tracker
-                </button>
-                <button
-                  className="category"
-                  style={{ background: "violet" }}
-                  onClick={() => setIsOpenEmotion(true)}
-                >
-                  emotion tracker
-                </button>
-              </div>
-              <div>{isOpenDigestive && <DigestiveForm />}</div>
-            </div>
-          </div>
-          <ul>
-            {filteredExpenses.map((expense) => (
-              <li key={expense.id}>{expense.description}</li>
-            ))}
-          </ul>
-        </div>
-      </div>
+      {/* ... */}
     </div>
   );
 }
