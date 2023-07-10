@@ -62,6 +62,65 @@ function CravingForm({ onExpenseSubmit, expense, selectedDate }) {
     </form>
   );
 }
+
+function PeriodForm({ onExpenseSubmit, expense, selectedDate }) {
+  const [description, setDescription] = useState("");
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(new Date());
+
+  useEffect(() => {
+    setDate(new Date(selectedDate));
+    // if (expense) {
+    //   setDescription(expense.description);
+    //   setAmount(expense.amount.toFixed(2));
+    //   setDate(new Date(expense.date));
+    // }
+  }, [selectedDate]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (!description || !amount) return;
+    const newExpense = {
+      description,
+      amount: parseFloat(amount),
+      date,
+    };
+    onExpenseSubmit(newExpense, expense ? expense.id : null);
+    setDescription("");
+    setAmount("");
+    setDate(new Date());
+  };
+
+  const changeHandler = (date) => {
+    setDate(date);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        placeholder="Enter description..."
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
+      <input
+        type="number"
+        step="0.01"
+        placeholder="Enter amount..."
+        value={amount}
+        onChange={(e) => setAmount(e.target.value)}
+      />
+      <div>
+        <label>Date:</label>
+        <DatePicker selected={date} onChange={changeHandler} />
+      </div>
+
+      <button type="submit">
+        {expense ? "Update Expense" : "Add Expense"}
+      </button>
+    </form>
+  );
+}
 function DigestiveLogger({ selectedDate, onDigestiveLog }) {
   const [selectedDigestives, setSelectedDigestives] = useState([]);
 
@@ -209,7 +268,7 @@ function EmotionLogger({ selectedDate, onEmotionLog }) {
   );
 }
 
-function EmotionLog({ log }) {
+function EmotionLog({ log, activeTracker }) {
   return (
     <div>
       {log.emotions?.length > 0 && (
@@ -226,6 +285,15 @@ function EmotionLog({ log }) {
       {log.cravings?.map((craving, index) => (
         <p key={index}>
           {craving.description} - Level: {craving.amount}
+        </p>
+      ))}
+
+      {log.period?.length > 0 && (
+        <h2>Period Log for {log.date?.toDateString()}:</h2>
+      )}
+      {log.period?.map((pd, index) => (
+        <p key={index}>
+          {pd.description} - Level: {pd.amount}
         </p>
       ))}
     </div>
@@ -305,13 +373,15 @@ function Trackers() {
       const existingLogIndex = emotionLogs.findIndex(
         (log) => log.date.toDateString() === expense.date.toDateString()
       );
-
+      let vad = activeTracker;
+      console.log("active", activeTracker);
+      console.log("vad", vad);
       if (existingLogIndex !== -1) {
         const updatedLogs = [...emotionLogs];
-        if (!updatedLogs[existingLogIndex].cravings) {
-          updatedLogs[existingLogIndex].cravings = [expense];
+        if (!updatedLogs[existingLogIndex][activeTracker]) {
+          updatedLogs[existingLogIndex][activeTracker] = [expense];
         } else {
-          updatedLogs[existingLogIndex].cravings.push(expense);
+          updatedLogs[existingLogIndex][activeTracker].push(expense);
         }
         setEmotionLogs(updatedLogs);
       } else {
@@ -319,7 +389,7 @@ function Trackers() {
           ...emotionLogs,
           {
             date: expense.date,
-            cravings: [expense],
+            [activeTracker]: [expense],
           },
         ]);
       }
@@ -358,9 +428,17 @@ function Trackers() {
             onEmotionLog={handleEmotionLog}
           />
         );
-      case "craving":
+      case "cravings":
         return (
           <CravingForm
+            onExpenseSubmit={handleExpenseSubmit}
+            selectedDate={selectedDate}
+            onCravingLog={handleCravingLog}
+          />
+        );
+      case "period":
+        return (
+          <PeriodForm
             onExpenseSubmit={handleExpenseSubmit}
             selectedDate={selectedDate}
             onCravingLog={handleCravingLog}
@@ -380,7 +458,12 @@ function Trackers() {
 
   return (
     <div className="App">
-      <h1>Emotion Tracker</h1>
+      <h1>
+        <span style={{ filter: "blur(5px)", WebkitFilter: "blur(5px)" }}>
+          Emotion
+        </span>{" "}
+        Tracker
+      </h1>
       <div style={{ display: "inline-flex" }}>
         <div className="left-calendar" style={{ padding: "2rem" }}>
           <ReactCalendar
@@ -393,6 +476,15 @@ function Trackers() {
           <div id="category">
             <button
               className={`category ${
+                activeTracker === "period" ? "active" : ""
+              }`}
+              style={{ background: "tomato" }}
+              onClick={() => setActiveTracker("period")}
+            >
+              Period tracker
+            </button>
+            <button
+              className={`category ${
                 activeTracker === "emotion" ? "active" : ""
               }`}
               style={{ background: "violet" }}
@@ -402,10 +494,10 @@ function Trackers() {
             </button>
             <button
               className={`category ${
-                activeTracker === "craving" ? "active" : ""
+                activeTracker === "cravings" ? "active" : ""
               }`}
               style={{ background: "gold" }}
-              onClick={() => setActiveTracker("craving")}
+              onClick={() => setActiveTracker("cravings")}
             >
               craving tracker
             </button>
@@ -424,7 +516,7 @@ function Trackers() {
       </div>
       <div>
         {getEmotionLogsByDate(selectedDate).map((log, index) => (
-          <EmotionLog key={index} log={log} />
+          <EmotionLog key={index} log={log} activeTracker={activeTracker} />
         ))}
       </div>
       {/* ... */}
