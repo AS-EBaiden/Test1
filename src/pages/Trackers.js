@@ -65,23 +65,22 @@ function CravingForm({ onExpenseSubmit, expense, selectedDate }) {
 
 function PeriodForm({ onExpenseSubmit, expense, selectedDate }) {
   const [description, setDescription] = useState("");
-  const [amount, setAmount] = useState("");
+  const [enableNotes, setEnableNotes] = useState(false);
+  const [amount, setAmount] = useState(1);
   const [date, setDate] = useState(new Date());
+  const [selectedPeriod, setSelectedPeriod] = useState([]);
 
   useEffect(() => {
     setDate(new Date(selectedDate));
-    // if (expense) {
-    //   setDescription(expense.description);
-    //   setAmount(expense.amount.toFixed(2));
-    //   setDate(new Date(expense.date));
-    // }
   }, [selectedDate]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (!description || !amount) return;
     const newExpense = {
-      description,
+      description: description || "Period Started",
+      isStarted: true,
+      endDate:
+        "insert logic that adds your average period days number from when the date of your period started this month ",
       amount: parseFloat(amount),
       date,
     };
@@ -89,35 +88,49 @@ function PeriodForm({ onExpenseSubmit, expense, selectedDate }) {
     setDescription("");
     setAmount("");
     setDate(new Date());
-  };
-
-  const changeHandler = (date) => {
-    setDate(date);
+    setEnableNotes(false);
   };
 
   return (
     <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        placeholder="Enter description..."
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
-      <input
-        type="number"
-        step="0.01"
-        placeholder="Enter amount..."
-        value={amount}
-        onChange={(e) => setAmount(e.target.value)}
-      />
-      <div>
-        <label>Date:</label>
-        <DatePicker selected={date} onChange={changeHandler} />
-      </div>
+      {enableNotes ? (
+        <>
+          <textarea
+            type="text"
+            placeholder="Enter any additional details"
+            value={description}
+            onChange={(e) => setDescription(e.target.value)}
+          />
 
-      <button type="submit">
-        {expense ? "Update Expense" : "Add Expense"}
-      </button>
+          <input
+            type="range"
+            min={1}
+            max={10}
+            value={amount}
+            onChange={(e) => setAmount(parseInt(e.target.value))}
+          />
+          <span>{amount}</span>
+        </>
+      ) : (
+        <>
+          <span>Pain Level: {amount}</span>
+          <span></span>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setEnableNotes(true);
+            }}
+          >
+            Add Notes
+          </button>
+        </>
+      )}
+
+      <div>
+        <button type="submit">
+          {expense ? "Update Expense" : "Track Now"}
+        </button>
+      </div>
     </form>
   );
 }
@@ -293,7 +306,7 @@ function EmotionLog({ log, activeTracker }) {
       )}
       {log.period?.map((pd, index) => (
         <p key={index}>
-          {pd.description} - Level: {pd.amount}
+          {pd.isStarted} {pd.description} - Pain Level: {pd.amount}
         </p>
       ))}
     </div>
@@ -409,7 +422,23 @@ function Trackers() {
     const hasEmotionLog = emotionLogs.some(
       (log) => log.date.toDateString() === formattedDate
     );
-    return hasEmotionLog ? <div className="emotion-log-asterisk">*</div> : null;
+
+    // const hasPeriodLog = emotionLogs.some(
+    //   (item) => item.period[0].date.toDateString() === formattedDate
+    // );
+    return (
+      <>
+        {hasEmotionLog ? <div className="emotion-log-asterisk">*</div> : null}
+        {/* {hasPeriodLog ? (
+          <div
+            style={{ color: "red", fontWeight: 900 }}
+            className="emotion-log-asterisk"
+          >
+            *
+          </div>
+        ) : null} */}
+      </>
+    );
   };
 
   const getEmotionLogsByDate = (date) => {
