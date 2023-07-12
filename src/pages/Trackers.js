@@ -318,6 +318,8 @@ function Trackers() {
   const [emotionLogs, setEmotionLogs] = useState([]);
   const [activeTracker, setActiveTracker] = useState(null);
   const [expenses, setExpenses] = useState([]);
+  const [trackedPeriodDates, setTrackedPeriodDates] = useState([]);
+  const [trackedEmotionDates, setEmotionPeriodDates] = useState([]);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -376,19 +378,67 @@ function Trackers() {
     }
   };
 
+  // const handleExpenseSubmit = (expense, id) => {
+  //   if (id) {
+  //     const updatedExpenses = expenses.map((item) =>
+  //       item.id === id ? { ...item, ...expense } : item
+  //     );
+  //     setExpenses(updatedExpenses);
+  //   } else {
+  //     const existingLogIndex = emotionLogs.findIndex(
+  //       (log) => log.date.toDateString() === expense.date.toDateString()
+  //     );
+  //     let vad = activeTracker;
+  //     console.log("active", activeTracker);
+  //     console.log("vad", vad);
+  //     if (existingLogIndex !== -1) {
+  //       const updatedLogs = [...emotionLogs];
+  //       if (!updatedLogs[existingLogIndex][activeTracker]) {
+  //         updatedLogs[existingLogIndex][activeTracker] = [expense];
+  //       } else {
+  //         updatedLogs[existingLogIndex][activeTracker].push(expense);
+  //       }
+  //       setEmotionLogs(updatedLogs);
+  //     } else {
+  //       setEmotionLogs([
+  //         ...emotionLogs,
+  //         {
+  //           date: expense.date,
+  //           [activeTracker]: [expense],
+  //         },
+  //       ]);
+  //     }
+  //     if (activeTracker === "period") {
+  //       setTrackedPeriodDates((prevDates) => [
+  //         ...prevDates,
+  //         expense.date.toDateString(),
+  //       ]);
+  //     }
+
+  //     const newExpense = {
+  //       ...expense,
+  //       id: Date.now(),
+  //       date: expense.date.toString(),
+  //     };
+  //     const updatedExpenses = [...expenses, newExpense];
+  //     setExpenses(updatedExpenses);
+  //   }
+  // };
+
   const handleExpenseSubmit = (expense, id) => {
     if (id) {
-      const updatedExpenses = expenses.map((item) =>
-        item.id === id ? { ...item, ...expense } : item
-      );
-      setExpenses(updatedExpenses);
+      // ...
     } else {
+      const formattedDate = expense.date.toDateString();
+
+      if (activeTracker === "period") {
+        setTrackedPeriodDates((prevDates) => [...prevDates, formattedDate]);
+      }
+
       const existingLogIndex = emotionLogs.findIndex(
-        (log) => log.date.toDateString() === expense.date.toDateString()
+        (log) => log.date.toDateString() === formattedDate
       );
-      let vad = activeTracker;
-      console.log("active", activeTracker);
-      console.log("vad", vad);
+
       if (existingLogIndex !== -1) {
         const updatedLogs = [...emotionLogs];
         if (!updatedLogs[existingLogIndex][activeTracker]) {
@@ -406,37 +456,150 @@ function Trackers() {
           },
         ]);
       }
-
-      const newExpense = {
-        ...expense,
-        id: Date.now(),
-        date: expense.date.toString(),
-      };
-      const updatedExpenses = [...expenses, newExpense];
-      setExpenses(updatedExpenses);
     }
   };
+
+  // const tileContent = ({ date }) => {
+  //   const formattedDate = date.toDateString();
+  //   const hasEmotionLog = emotionLogs.some(
+  //     (log) => log.date.toDateString() === formattedDate
+  //   );
+
+  //   const hasTrackedPeriod = trackedPeriodDates.includes(formattedDate);
+
+  //   return (
+  //     <>
+  //       {hasEmotionLog && !hasTrackedPeriod ? (
+  //         <div className="emotion-log-asterisk">*</div>
+  //       ) : null}
+  //       {hasTrackedPeriod ? (
+  //         <div
+  //           style={{ color: "red", fontWeight: 900 }}
+  //           className="period-log-asterisk"
+  //         >
+  //           *
+  //         </div>
+  //       ) : null}
+  //     </>
+  //   );
+  // };
+  // const tileContent = ({ date }) => {
+  //   const formattedDate = date.toDateString();
+  //   const hasEmotionLog = emotionLogs.some(
+  //     (log) => log.date.toDateString() === formattedDate
+  //   );
+  //   const hasTrackedPeriod = trackedPeriodDates.includes(formattedDate);
+
+  //   return (
+  //     <>
+  //       {hasEmotionLog && !hasTrackedPeriod ? (
+  //         <div className="emotion-log-asterisk">*</div>
+  //       ) : null}
+  //       {hasTrackedPeriod && hasEmotionLog ? (
+  //         <div
+  //           style={{ color: "red", fontWeight: 900 }}
+  //           className="period-log-asterisk"
+  //         >
+  //           *
+  //         </div>
+  //       ) : null}
+  //     </>
+  //   );
+  // };
+  // const tileContent = ({ date }) => {
+  //   const formattedDate = date.toDateString();
+  //   const hasEmotionLog = emotionLogs.some(
+  //     (log) => log.date.toDateString() === formattedDate
+  //   );
+  //   const hasTrackedPeriod = trackedPeriodDates.includes(formattedDate);
+  //   const hasEmotionPeriod = trackedEmotionDates.includes(formattedDate);
+  //   console.log("hello", hasTrackedPeriod);
+  //   return (
+  //     <>
+  //       {hasEmotionPeriod ? (
+  //         <div
+  //           className="emotion-log-asterisk"
+  //           style={{ color: "dodgerblue", fontWeight: 900 }}
+  //         >
+  //           *
+  //         </div>
+  //       ) : null}
+  //       {hasEmotionPeriod && !hasTrackedPeriod ? (
+  //         <div
+  //           style={{ color: "green", fontWeight: 900 }}
+  //           className="emotion-log-asterisk"
+  //         >
+  //           *
+  //         </div>
+  //       ) : null}
+  //       {hasTrackedPeriod ? (
+  //         <div
+  //           style={{ color: "red", fontWeight: 900 }}
+  //           className="period-log-asterisk"
+  //         >
+  //           *
+  //         </div>
+  //       ) : null}
+
+  //       {/* <>{hasEmotionLog ? <div>💖</div> : ""}</> */}
+  //     </>
+  //   );
+  // };
+  // const tileContent = ({ date }) => {
+  //   const formattedDate = date.toDateString();
+  //   const hasEmotionLog = emotionLogs.some(
+  //     (log) => log.date.toDateString() === formattedDate
+  //   );
+  //   const hasPeriodLog = trackedPeriodDates.includes(formattedDate);
+
+  //   return (
+  //     <>
+  //       {hasEmotionLog ? (
+  //         <div className="emotion-log-asterisk" style={{ color: "red" }}>
+  //           *
+  //         </div>
+  //       ) : null}
+  //       {hasPeriodLog ? (
+  //         <div
+  //           className="period-log-asterisk"
+  //           style={{ color: "green", fontWeight: 900 }}
+  //         >
+  //           *
+  //         </div>
+  //       ) : null}
+  //     </>
+  //   );
+  // };
 
   const tileContent = ({ date }) => {
     const formattedDate = date.toDateString();
     const hasEmotionLog = emotionLogs.some(
-      (log) => log.date.toDateString() === formattedDate
+      (log) =>
+        log.date.toDateString() === formattedDate && log.emotions?.length > 0
+    );
+    const hasPeriodLog = emotionLogs.some(
+      (log) =>
+        log.date.toDateString() === formattedDate && log.period?.length > 0
     );
 
-    // const hasPeriodLog = emotionLogs.some(
-    //   (item) => item.period[0].date.toDateString() === formattedDate
-    // );
     return (
       <>
-        {hasEmotionLog ? <div className="emotion-log-asterisk">*</div> : null}
-        {/* {hasPeriodLog ? (
+        {hasEmotionLog ? (
           <div
-            style={{ color: "red", fontWeight: 900 }}
             className="emotion-log-asterisk"
+            style={{ color: "dodgerblue", fontWeight: 900 }}
           >
             *
           </div>
-        ) : null} */}
+        ) : null}
+        {hasPeriodLog ? (
+          <div
+            className="period-log-asterisk"
+            style={{ color: "red", fontWeight: 900 }}
+          >
+            *
+          </div>
+        ) : null}
       </>
     );
   };
