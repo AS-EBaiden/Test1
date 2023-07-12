@@ -63,6 +63,60 @@ function CravingForm({ onExpenseSubmit, expense, selectedDate }) {
   );
 }
 
+function NotesForm({ onExpenseSubmit, expense, selectedDate }) {
+  const [description, setDescription] = useState("");
+  const [notes, setNotes] = useState("");
+  const [amount, setAmount] = useState("");
+  const [date, setDate] = useState(new Date());
+
+  useEffect(() => {
+    setDate(new Date(selectedDate));
+    // if (expense) {
+    //   setDescription(expense.description);
+    //   setAmount(expense.amount.toFixed(2));
+    //   setDate(new Date(expense.date));
+    // }
+  }, [selectedDate]);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    // if (!description || !amount) return;
+    const newExpense = {
+      description,
+      notes,
+      date,
+    };
+    onExpenseSubmit(newExpense, expense ? expense.id : null);
+    setDescription("");
+    setAmount("");
+    setNotes("");
+    setDate(new Date());
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        type="text"
+        placeholder="Enter description..."
+        value={description}
+        onChange={(e) => setDescription(e.target.value)}
+      />
+      <div>
+        <textarea
+          type="text"
+          placeholder={`Enter notes for ${date}...`}
+          value={notes}
+          onChange={(e) => setNotes(e.target.value)}
+        />
+      </div>
+
+      <button type="submit">
+        {expense ? "Update Expense" : "Add Expense"}
+      </button>
+    </form>
+  );
+}
+
 function PeriodForm({ onExpenseSubmit, expense, selectedDate }) {
   const [description, setDescription] = useState("");
   const [enableNotes, setEnableNotes] = useState(false);
@@ -284,6 +338,14 @@ function EmotionLogger({ selectedDate, onEmotionLog }) {
 function EmotionLog({ log, activeTracker }) {
   return (
     <div>
+      {log.notes?.length > 0 && <h2>Notes for {log.date?.toDateString()}:</h2>}
+      {log.notes?.map((note, index) => (
+        <div>
+          <h2>{note.description}:</h2>
+
+          <p key={index}>{note.notes}</p>
+        </div>
+      ))}
       {log.emotions?.length > 0 && (
         <h2>Emotion Log for {log.date?.toDateString()}:</h2>
       )}
@@ -378,53 +440,6 @@ function Trackers() {
     }
   };
 
-  // const handleExpenseSubmit = (expense, id) => {
-  //   if (id) {
-  //     const updatedExpenses = expenses.map((item) =>
-  //       item.id === id ? { ...item, ...expense } : item
-  //     );
-  //     setExpenses(updatedExpenses);
-  //   } else {
-  //     const existingLogIndex = emotionLogs.findIndex(
-  //       (log) => log.date.toDateString() === expense.date.toDateString()
-  //     );
-  //     let vad = activeTracker;
-  //     console.log("active", activeTracker);
-  //     console.log("vad", vad);
-  //     if (existingLogIndex !== -1) {
-  //       const updatedLogs = [...emotionLogs];
-  //       if (!updatedLogs[existingLogIndex][activeTracker]) {
-  //         updatedLogs[existingLogIndex][activeTracker] = [expense];
-  //       } else {
-  //         updatedLogs[existingLogIndex][activeTracker].push(expense);
-  //       }
-  //       setEmotionLogs(updatedLogs);
-  //     } else {
-  //       setEmotionLogs([
-  //         ...emotionLogs,
-  //         {
-  //           date: expense.date,
-  //           [activeTracker]: [expense],
-  //         },
-  //       ]);
-  //     }
-  //     if (activeTracker === "period") {
-  //       setTrackedPeriodDates((prevDates) => [
-  //         ...prevDates,
-  //         expense.date.toDateString(),
-  //       ]);
-  //     }
-
-  //     const newExpense = {
-  //       ...expense,
-  //       id: Date.now(),
-  //       date: expense.date.toString(),
-  //     };
-  //     const updatedExpenses = [...expenses, newExpense];
-  //     setExpenses(updatedExpenses);
-  //   }
-  // };
-
   const handleExpenseSubmit = (expense, id) => {
     if (id) {
       // ...
@@ -459,118 +474,6 @@ function Trackers() {
     }
   };
 
-  // const tileContent = ({ date }) => {
-  //   const formattedDate = date.toDateString();
-  //   const hasEmotionLog = emotionLogs.some(
-  //     (log) => log.date.toDateString() === formattedDate
-  //   );
-
-  //   const hasTrackedPeriod = trackedPeriodDates.includes(formattedDate);
-
-  //   return (
-  //     <>
-  //       {hasEmotionLog && !hasTrackedPeriod ? (
-  //         <div className="emotion-log-asterisk">*</div>
-  //       ) : null}
-  //       {hasTrackedPeriod ? (
-  //         <div
-  //           style={{ color: "red", fontWeight: 900 }}
-  //           className="period-log-asterisk"
-  //         >
-  //           *
-  //         </div>
-  //       ) : null}
-  //     </>
-  //   );
-  // };
-  // const tileContent = ({ date }) => {
-  //   const formattedDate = date.toDateString();
-  //   const hasEmotionLog = emotionLogs.some(
-  //     (log) => log.date.toDateString() === formattedDate
-  //   );
-  //   const hasTrackedPeriod = trackedPeriodDates.includes(formattedDate);
-
-  //   return (
-  //     <>
-  //       {hasEmotionLog && !hasTrackedPeriod ? (
-  //         <div className="emotion-log-asterisk">*</div>
-  //       ) : null}
-  //       {hasTrackedPeriod && hasEmotionLog ? (
-  //         <div
-  //           style={{ color: "red", fontWeight: 900 }}
-  //           className="period-log-asterisk"
-  //         >
-  //           *
-  //         </div>
-  //       ) : null}
-  //     </>
-  //   );
-  // };
-  // const tileContent = ({ date }) => {
-  //   const formattedDate = date.toDateString();
-  //   const hasEmotionLog = emotionLogs.some(
-  //     (log) => log.date.toDateString() === formattedDate
-  //   );
-  //   const hasTrackedPeriod = trackedPeriodDates.includes(formattedDate);
-  //   const hasEmotionPeriod = trackedEmotionDates.includes(formattedDate);
-  //   console.log("hello", hasTrackedPeriod);
-  //   return (
-  //     <>
-  //       {hasEmotionPeriod ? (
-  //         <div
-  //           className="emotion-log-asterisk"
-  //           style={{ color: "dodgerblue", fontWeight: 900 }}
-  //         >
-  //           *
-  //         </div>
-  //       ) : null}
-  //       {hasEmotionPeriod && !hasTrackedPeriod ? (
-  //         <div
-  //           style={{ color: "green", fontWeight: 900 }}
-  //           className="emotion-log-asterisk"
-  //         >
-  //           *
-  //         </div>
-  //       ) : null}
-  //       {hasTrackedPeriod ? (
-  //         <div
-  //           style={{ color: "red", fontWeight: 900 }}
-  //           className="period-log-asterisk"
-  //         >
-  //           *
-  //         </div>
-  //       ) : null}
-
-  //       {/* <>{hasEmotionLog ? <div>💖</div> : ""}</> */}
-  //     </>
-  //   );
-  // };
-  // const tileContent = ({ date }) => {
-  //   const formattedDate = date.toDateString();
-  //   const hasEmotionLog = emotionLogs.some(
-  //     (log) => log.date.toDateString() === formattedDate
-  //   );
-  //   const hasPeriodLog = trackedPeriodDates.includes(formattedDate);
-
-  //   return (
-  //     <>
-  //       {hasEmotionLog ? (
-  //         <div className="emotion-log-asterisk" style={{ color: "red" }}>
-  //           *
-  //         </div>
-  //       ) : null}
-  //       {hasPeriodLog ? (
-  //         <div
-  //           className="period-log-asterisk"
-  //           style={{ color: "green", fontWeight: 900 }}
-  //         >
-  //           *
-  //         </div>
-  //       ) : null}
-  //     </>
-  //   );
-  // };
-
   const tileContent = ({ date }) => {
     const formattedDate = date.toDateString();
     const hasEmotionLog = emotionLogs.some(
@@ -582,8 +485,13 @@ function Trackers() {
         log.date.toDateString() === formattedDate && log.period?.length > 0
     );
 
+    const hasFullNotes = emotionLogs.some(
+      (log) =>
+        log.date.toDateString() === formattedDate && log.notes?.length > 0
+    );
+
     return (
-      <>
+      <div style={{ display: "flex", placeContent: "center" }}>
         {hasEmotionLog ? (
           <div
             className="emotion-log-asterisk"
@@ -600,7 +508,15 @@ function Trackers() {
             *
           </div>
         ) : null}
-      </>
+        {hasFullNotes ? (
+          <div
+            className="period-log-asterisk"
+            style={{ color: "violet", fontWeight: 900 }}
+          >
+            *
+          </div>
+        ) : null}
+      </div>
     );
   };
 
@@ -636,6 +552,14 @@ function Trackers() {
             onCravingLog={handleCravingLog}
           />
         );
+      case "notes":
+        return (
+          <NotesForm
+            onExpenseSubmit={handleExpenseSubmit}
+            selectedDate={selectedDate}
+            onCravingLog={handleCravingLog}
+          />
+        );
       case "digestive":
         return (
           <DigestiveLogger
@@ -647,6 +571,8 @@ function Trackers() {
         return null;
     }
   };
+
+  console.log("emotion logs", emotionLogs);
 
   return (
     <div className="App">
@@ -679,7 +605,7 @@ function Trackers() {
               className={`category ${
                 activeTracker === "emotion" ? "active" : ""
               }`}
-              style={{ background: "violet" }}
+              style={{ background: "gold" }}
               onClick={() => setActiveTracker("emotion")}
             >
               emotion tracker
@@ -688,7 +614,7 @@ function Trackers() {
               className={`category ${
                 activeTracker === "cravings" ? "active" : ""
               }`}
-              style={{ background: "gold" }}
+              style={{ background: "limegreen" }}
               onClick={() => setActiveTracker("cravings")}
             >
               craving tracker
@@ -701,6 +627,15 @@ function Trackers() {
               onClick={() => setActiveTracker("digestive")}
             >
               Digestive tracker
+            </button>
+            <button
+              className={`category ${
+                activeTracker === "notes" ? "active" : ""
+              }`}
+              style={{ background: "violet" }}
+              onClick={() => setActiveTracker("notes")}
+            >
+              Notes
             </button>
           </div>
           <div>{trackerFeatures()}</div>
