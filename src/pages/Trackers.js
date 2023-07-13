@@ -112,13 +112,18 @@ function NotesForm({ onExpenseSubmit, expense, selectedDate }) {
   );
 }
 
-function PeriodForm({ onExpenseSubmit, expense, selectedDate }) {
+function PeriodForm({
+  onExpenseSubmit,
+  expense,
+  selectedDate,
+  numOfPeriodDays,
+  setNumOfPeriodDays,
+}) {
   const [description, setDescription] = useState("");
   const [enableNotes, setEnableNotes] = useState(false);
   const [amount, setAmount] = useState(1);
   const [date, setDate] = useState(new Date());
   const [selectedPeriod, setSelectedPeriod] = useState([]);
-  const numOfPeriodDays = 2;
 
   const today = new Date();
   const daysLater = new Date();
@@ -164,7 +169,14 @@ function PeriodForm({ onExpenseSubmit, expense, selectedDate }) {
             value={amount}
             onChange={(e) => setAmount(parseInt(e.target.value))}
           />
-          <span>{amount}</span>
+
+          <input
+            type="number"
+            step="1"
+            placeholder="Enter number..."
+            value={numOfPeriodDays}
+            onChange={(e) => setNumOfPeriodDays(Number(e.target.value))}
+          />
         </>
       ) : (
         <>
@@ -336,7 +348,7 @@ function EmotionLogger({ selectedDate, onEmotionLog }) {
   );
 }
 
-function EmotionLog({ log, activeTracker }) {
+function EmotionLog({ log, activeTracker, numOfPeriodDays }) {
   return (
     <div>
       {log.notes?.length > 0 && <h2>Notes for {log.date?.toDateString()}:</h2>}
@@ -368,9 +380,13 @@ function EmotionLog({ log, activeTracker }) {
         <h2>Period Log for {log.date?.toDateString()}:</h2>
       )}
       {log.period?.map((pd, index) => (
-        <p key={index}>
-          {pd.isStarted} {pd.description} - Pain Level: {pd.amount}
-        </p>
+        <div key={index}>
+          <p>
+            {" "}
+            {pd.isStarted} {pd.description} - Pain Level: {pd.amount}
+          </p>
+          <p>Period Duration: {numOfPeriodDays} Days</p>
+        </div>
       ))}
     </div>
   );
@@ -383,6 +399,7 @@ function Trackers() {
   const [expenses, setExpenses] = useState([]);
   const [trackedPeriodDates, setTrackedPeriodDates] = useState([]);
   const [trackedEmotionDates, setEmotionPeriodDates] = useState([]);
+  const [numOfPeriodDays, setNumOfPeriodDays] = useState(0);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -577,6 +594,10 @@ function Trackers() {
       (log) =>
         log.date.toDateString() === formattedDate && log.period?.length > 0
     );
+    const hasCravingsLog = emotionLogs.some(
+      (log) =>
+        log.date.toDateString() === formattedDate && log.cravings?.length > 0
+    );
     const hasPeriodEndLog = emotionLogs.some(
       (log) =>
         log.period &&
@@ -592,17 +613,18 @@ function Trackers() {
     const isBetweenPeriod = trackedPeriodDates.some(
       (trackedDate) =>
         new Date(trackedDate) <= date &&
-        new Date(trackedDate).setDate(new Date(trackedDate).getDate() + 2) >=
-          date
+        new Date(trackedDate).setDate(
+          new Date(trackedDate).getDate() + numOfPeriodDays
+        ) >= date
     );
 
     return (
       <div style={{ display: "flex", placeContent: "center" }}>
-        {hasEmotionLog && <div className="emotion-log-asterisk">🍉</div>}
-        {/* {hasPeriodLog && <div className="period-log-asterisk">🍊</div>}
-        {hasPeriodEndLog && <div className="period-log-asterisk">🍋</div>} */}
-        {hasFullNotes && <div className="period-log-asterisk">🍆</div>}
-        {isBetweenPeriod && <div className="period-log-asterisk">🥝</div>}
+        {hasEmotionLog && <div className="emotion-log-asterisk">🥰</div>}
+        {/* {hasPeriodLog && <div className="period-log-asterisk">🍊</div>}*/}
+        {hasCravingsLog && <div className="period-log-asterisk">🍋</div>}
+        {hasFullNotes && <div className="period-log-asterisk">🧾</div>}
+        {isBetweenPeriod && <div className="period-log-asterisk">🩸</div>}
       </div>
     );
   };
@@ -637,6 +659,8 @@ function Trackers() {
             onExpenseSubmit={handleExpenseSubmit}
             selectedDate={selectedDate}
             onCravingLog={handleCravingLog}
+            numOfPeriodDays={numOfPeriodDays}
+            setNumOfPeriodDays={setNumOfPeriodDays}
           />
         );
       case "notes":
@@ -660,6 +684,7 @@ function Trackers() {
   };
 
   console.log("emotion logs", emotionLogs);
+  console.log("num of days", numOfPeriodDays);
 
   return (
     <div className="App">
@@ -730,7 +755,12 @@ function Trackers() {
       </div>
       <div>
         {getEmotionLogsByDate(selectedDate).map((log, index) => (
-          <EmotionLog key={index} log={log} activeTracker={activeTracker} />
+          <EmotionLog
+            key={index}
+            log={log}
+            activeTracker={activeTracker}
+            numOfPeriodDays={numOfPeriodDays}
+          />
         ))}
       </div>
       {/* ... */}
