@@ -11,11 +11,6 @@ function CravingForm({ onExpenseSubmit, expense, selectedDate }) {
 
   useEffect(() => {
     setDate(new Date(selectedDate));
-    // if (expense) {
-    //   setDescription(expense.description);
-    //   setAmount(expense.amount.toFixed(2));
-    //   setDate(new Date(expense.date));
-    // }
   }, [selectedDate]);
 
   const handleSubmit = (e) => {
@@ -123,6 +118,11 @@ function PeriodForm({ onExpenseSubmit, expense, selectedDate }) {
   const [amount, setAmount] = useState(1);
   const [date, setDate] = useState(new Date());
   const [selectedPeriod, setSelectedPeriod] = useState([]);
+  const numOfPeriodDays = 2;
+
+  const today = new Date();
+  const daysLater = new Date();
+  daysLater.setDate(today.getDate() + numOfPeriodDays);
 
   useEffect(() => {
     setDate(new Date(selectedDate));
@@ -133,8 +133,9 @@ function PeriodForm({ onExpenseSubmit, expense, selectedDate }) {
     const newExpense = {
       description: description || "Period Started",
       isStarted: true,
-      endDate:
-        "insert logic that adds your average period days number from when the date of your period started this month ",
+      endDate: daysLater.toDateString(),
+      // endDate:
+      //   "insert logic that adds your average period days number from when the date of your period started this month ",
       amount: parseFloat(amount),
       date,
     };
@@ -474,6 +475,98 @@ function Trackers() {
     }
   };
 
+  // const tileContent = ({ date }) => {
+  //   const formattedDate = date.toDateString();
+  //   const hasEmotionLog = emotionLogs.some(
+  //     (log) =>
+  //       log.date.toDateString() === formattedDate && log.emotions?.length > 0
+  //   );
+  //   const hasPeriodLog = emotionLogs.some(
+  //     (log) =>
+  //       log.date.toDateString() === formattedDate && log.period?.length > 0
+  //   );
+
+  //   const hasPeriodEndLog = emotionLogs.some(
+  //     (log) =>
+  //       log.period &&
+  //       log.period.length > 0 &&
+  //       log.period[0].endDate === formattedDate
+  //   );
+
+  //   const isBetweenPeriod = emotionLogs.some(
+  //     (log) =>
+  //       log.period &&
+  //       log.period.length > 0 &&
+  //       log.period[0].startDate <= date &&
+  //       log.period[0].endDate >= date
+  //   );
+
+  //   console.log(
+  //     "isbetween",
+  //     emotionLogs.map(
+  //       (log) => log.period[0].startDate
+  //       // &&
+  //       // log.period.length > 0 &&
+  //       // log.period[0].startDate <= date &&
+  //       // log.period[0].endDate >= date
+  //     )
+  //   );
+
+  //   const hasFullNotes = emotionLogs.some(
+  //     (log) =>
+  //       log.date.toDateString() === formattedDate && log.notes?.length > 0
+  //   );
+
+  //   return (
+  //     <div style={{ display: "flex", placeContent: "center" }}>
+  //       {hasEmotionLog ? (
+  //         <div
+  //           className="emotion-log-asterisk"
+  //           style={{ color: "dodgerblue", fontWeight: 900 }}
+  //         >
+  //           *
+  //         </div>
+  //       ) : null}
+  //       {hasPeriodLog ? (
+  //         <div
+  //           className="period-log-asterisk"
+  //           style={{ color: "red", fontWeight: 900 }}
+  //         >
+  //           *
+  //         </div>
+  //       ) : null}
+
+  //       {isBetweenPeriod ? (
+  //         <div
+  //           className="period-log-asterisk"
+  //           style={{ color: "red", fontWeight: 900 }}
+  //         >
+  //           *
+  //         </div>
+  //       ) : null}
+  //       {isBetweenPeriod && (
+  //         <div className="period-log-in-between-marker"></div>
+  //       )}
+  //       {hasPeriodEndLog ? (
+  //         <div
+  //           className="period-log-asterisk"
+  //           style={{ color: "red", fontWeight: 900 }}
+  //         >
+  //           *
+  //         </div>
+  //       ) : null}
+  //       {hasFullNotes ? (
+  //         <div
+  //           className="period-log-asterisk"
+  //           style={{ color: "violet", fontWeight: 900 }}
+  //         >
+  //           *
+  //         </div>
+  //       ) : null}
+  //     </div>
+  //   );
+  // };
+
   const tileContent = ({ date }) => {
     const formattedDate = date.toDateString();
     const hasEmotionLog = emotionLogs.some(
@@ -484,38 +577,32 @@ function Trackers() {
       (log) =>
         log.date.toDateString() === formattedDate && log.period?.length > 0
     );
+    const hasPeriodEndLog = emotionLogs.some(
+      (log) =>
+        log.period &&
+        log.period.length > 0 &&
+        log.period[0].endDate === formattedDate
+    );
 
     const hasFullNotes = emotionLogs.some(
       (log) =>
         log.date.toDateString() === formattedDate && log.notes?.length > 0
     );
 
+    const isBetweenPeriod = trackedPeriodDates.some(
+      (trackedDate) =>
+        new Date(trackedDate) <= date &&
+        new Date(trackedDate).setDate(new Date(trackedDate).getDate() + 2) >=
+          date
+    );
+
     return (
       <div style={{ display: "flex", placeContent: "center" }}>
-        {hasEmotionLog ? (
-          <div
-            className="emotion-log-asterisk"
-            style={{ color: "dodgerblue", fontWeight: 900 }}
-          >
-            *
-          </div>
-        ) : null}
-        {hasPeriodLog ? (
-          <div
-            className="period-log-asterisk"
-            style={{ color: "red", fontWeight: 900 }}
-          >
-            *
-          </div>
-        ) : null}
-        {hasFullNotes ? (
-          <div
-            className="period-log-asterisk"
-            style={{ color: "violet", fontWeight: 900 }}
-          >
-            *
-          </div>
-        ) : null}
+        {hasEmotionLog && <div className="emotion-log-asterisk">🍉</div>}
+        {/* {hasPeriodLog && <div className="period-log-asterisk">🍊</div>}
+        {hasPeriodEndLog && <div className="period-log-asterisk">🍋</div>} */}
+        {hasFullNotes && <div className="period-log-asterisk">🍆</div>}
+        {isBetweenPeriod && <div className="period-log-asterisk">🥝</div>}
       </div>
     );
   };
