@@ -351,6 +351,14 @@ function EmotionLogger({ selectedDate, onEmotionLog }) {
 function EmotionLog({ log, activeTracker, numOfPeriodDays }) {
   return (
     <div>
+      {log.costs?.length > 0 && <h2>Costs for {log.date?.toDateString()}:</h2>}
+      {log.costs?.map((note, index) => (
+        <div key={index}>
+          <h2>{note.description}:</h2>
+
+          <p key={index}>{note.costs}</p>
+        </div>
+      ))}
       {log.budgets?.length > 0 && (
         <h2>Budgets for {log.date?.toDateString()}:</h2>
       )}
@@ -483,6 +491,109 @@ function BudgetForm({
   );
 }
 
+function BudgetExpense({
+  onExpenseSubmit,
+  expense,
+  selectedDate,
+  setEmotionLogs,
+  emotionLogs,
+}) {
+  const [boards, setBoards] = useState([]);
+  const [newBoardTitle, setNewBoardTitle] = useState("");
+  const [newListTitle, setNewListTitle] = useState("");
+  const [date, setDate] = useState(new Date());
+  const [budgetAmount, setBudgetAmout] = useState(0);
+  const [expenseAmount, setExpenseAmount] = useState(0);
+  const handleBoardTitleChange = (e) => {
+    setNewBoardTitle(e.target.value);
+  };
+
+  const handleAddBoard = () => {
+    const newExpense = {
+      description: newBoardTitle,
+      lists: [],
+      amount: budgetAmount,
+      date,
+    };
+    if (newBoardTitle.trim() !== "") {
+      setBoards([...boards, { title: newBoardTitle, lists: [] }]);
+      onExpenseSubmit(newExpense);
+      setNewBoardTitle("");
+    }
+  };
+
+  const handleAddList = (boardIndex) => {
+    const updatedBoards = [...boards];
+    const updatedExp = [...emotionLogs];
+    updatedBoards[boardIndex].lists.push({ title: newListTitle });
+    console.log(
+      "updated expe",
+      updatedExp,
+      updatedExp[0]["costs"][boardIndex].lists.push({
+        title: newListTitle,
+        amount: expenseAmount,
+      })
+    );
+    setEmotionLogs(updatedExp);
+    setBoards(updatedBoards);
+    setNewListTitle("");
+  };
+
+  console.log("boards", boards);
+
+  return (
+    <div>
+      <h2>Trello Board</h2>
+
+      <div>
+        <input
+          type="text"
+          placeholder="Enter board title"
+          value={newBoardTitle}
+          onChange={handleBoardTitleChange}
+        />
+        <input
+          type="number"
+          step="0.01"
+          placeholder="Enter your budget..."
+          value={budgetAmount}
+          onChange={(e) => setBudgetAmout(parseFloat(e.target.value))}
+        />
+        <button onClick={handleAddBoard}>Add Board</button>
+      </div>
+
+      {boards.map((board, boardIndex) => (
+        <div key={boardIndex}>
+          <h3>{board.title}</h3>
+          <p>{budgetAmount.toFixed(2)}</p>
+          <div>
+            <input
+              type="text"
+              placeholder="Enter list title"
+              value={newListTitle}
+              onChange={(e) => setNewListTitle(e.target.value)}
+            />
+            <input
+              type="number"
+              step="0.01"
+              placeholder="Enter your budget..."
+              value={expenseAmount}
+              onChange={(e) => setExpenseAmount(parseFloat(e.target.value))}
+            />
+            <button onClick={() => handleAddList(boardIndex)}>Add List</button>
+          </div>
+
+          {board.lists.map((list, listIndex) => (
+            <div key={listIndex}>
+              <h4>{list.title}</h4>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Trackers() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [emotionLogs, setEmotionLogs] = useState([]);
@@ -581,98 +692,6 @@ function Trackers() {
     }
   };
 
-  // const tileContent = ({ date }) => {
-  //   const formattedDate = date.toDateString();
-  //   const hasEmotionLog = emotionLogs.some(
-  //     (log) =>
-  //       log.date.toDateString() === formattedDate && log.emotions?.length > 0
-  //   );
-  //   const hasPeriodLog = emotionLogs.some(
-  //     (log) =>
-  //       log.date.toDateString() === formattedDate && log.period?.length > 0
-  //   );
-
-  //   const hasPeriodEndLog = emotionLogs.some(
-  //     (log) =>
-  //       log.period &&
-  //       log.period.length > 0 &&
-  //       log.period[0].endDate === formattedDate
-  //   );
-
-  //   const isBetweenPeriod = emotionLogs.some(
-  //     (log) =>
-  //       log.period &&
-  //       log.period.length > 0 &&
-  //       log.period[0].startDate <= date &&
-  //       log.period[0].endDate >= date
-  //   );
-
-  //   console.log(
-  //     "isbetween",
-  //     emotionLogs.map(
-  //       (log) => log.period[0].startDate
-  //       // &&
-  //       // log.period.length > 0 &&
-  //       // log.period[0].startDate <= date &&
-  //       // log.period[0].endDate >= date
-  //     )
-  //   );
-
-  //   const hasFullNotes = emotionLogs.some(
-  //     (log) =>
-  //       log.date.toDateString() === formattedDate && log.notes?.length > 0
-  //   );
-
-  //   return (
-  //     <div style={{ display: "flex", placeContent: "center" }}>
-  //       {hasEmotionLog ? (
-  //         <div
-  //           className="emotion-log-asterisk"
-  //           style={{ color: "dodgerblue", fontWeight: 900 }}
-  //         >
-  //           *
-  //         </div>
-  //       ) : null}
-  //       {hasPeriodLog ? (
-  //         <div
-  //           className="period-log-asterisk"
-  //           style={{ color: "red", fontWeight: 900 }}
-  //         >
-  //           *
-  //         </div>
-  //       ) : null}
-
-  //       {isBetweenPeriod ? (
-  //         <div
-  //           className="period-log-asterisk"
-  //           style={{ color: "red", fontWeight: 900 }}
-  //         >
-  //           *
-  //         </div>
-  //       ) : null}
-  //       {isBetweenPeriod && (
-  //         <div className="period-log-in-between-marker"></div>
-  //       )}
-  //       {hasPeriodEndLog ? (
-  //         <div
-  //           className="period-log-asterisk"
-  //           style={{ color: "red", fontWeight: 900 }}
-  //         >
-  //           *
-  //         </div>
-  //       ) : null}
-  //       {hasFullNotes ? (
-  //         <div
-  //           className="period-log-asterisk"
-  //           style={{ color: "violet", fontWeight: 900 }}
-  //         >
-  //           *
-  //         </div>
-  //       ) : null}
-  //     </div>
-  //   );
-  // };
-
   const tileContent = ({ date }) => {
     const formattedDate = date.toDateString();
     const hasEmotionLog = emotionLogs.some(
@@ -752,6 +771,16 @@ function Trackers() {
             onCravingLog={handleCravingLog}
           />
         );
+      case "costs":
+        return (
+          <BudgetExpense
+            emotionLogs={emotionLogs}
+            setEmotionLogs={setEmotionLogs}
+            onExpenseSubmit={handleExpenseSubmit}
+            selectedDate={selectedDate}
+            onCravingLog={handleCravingLog}
+          />
+        );
       case "period":
         return (
           <PeriodForm
@@ -783,7 +812,6 @@ function Trackers() {
   };
 
   console.log("emotion logs", emotionLogs);
-  console.log("num of days", numOfPeriodDays);
 
   return (
     <div className="App">
@@ -852,10 +880,19 @@ function Trackers() {
               className={`category ${
                 activeTracker === "budgets" ? "active" : ""
               }`}
-              style={{ background: "violet" }}
+              style={{ background: "mediumorchid" }}
               onClick={() => setActiveTracker("budgets")}
             >
               Budget
+            </button>
+            <button
+              className={`category ${
+                activeTracker === "costs" ? "active" : ""
+              }`}
+              style={{ background: "violet" }}
+              onClick={() => setActiveTracker("costs")}
+            >
+              Costs
             </button>
           </div>
           <div>{trackerFeatures()}</div>
