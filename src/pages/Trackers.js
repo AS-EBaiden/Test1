@@ -1,8 +1,99 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useId } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Calendar as ReactCalendar } from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+
+// function ExpenseForm({ onExpenseSubmit, expense, selectedDate }) {
+//   const [description, setDescription] = useState("");
+//   const [amount, setAmount] = useState("");
+//   const [date, setDate] = useState(new Date());
+//   const newId = useId();
+
+//   useEffect(() => {
+//     setDate(new Date(selectedDate));
+//   }, [selectedDate]);
+
+//   const handleSubmit = (e) => {
+//     e.preventDefault();
+//     const newExpense = {
+//       id: newId,
+//       description: "🍉",
+//       amount: parseFloat(amount),
+//       date,
+//     };
+//     const newBudget = {
+//       date,
+//     };
+//     onExpenseSubmit(newBudget, expense ? expense.id : null, newExpense);
+//     setDescription("");
+//     setAmount("");
+//     setDate(new Date());
+//   };
+//   console.log("expense", expense);
+
+//   return (
+//     <>
+//       <form onSubmit={handleSubmit}>
+//         <input
+//           type="text"
+//           placeholder="Enter description..."
+//           value={description}
+//           onChange={(e) => setDescription(e.target.value)}
+//         />
+
+//         <button type="submit">
+//           {expense ? "Update Expense" : "Add Expense"}
+//         </button>
+//       </form>
+//     </>
+//   );
+// }
+// function BudgetForm({ onExpenseSubmit, expense, selectedDate }) {
+//   const [description, setDescription] = useState("");
+//   const [amount, setAmount] = useState("");
+//   const [date, setDate] = useState(new Date());
+//   const newId = useId();
+
+//   useEffect(() => {
+//     setDate(new Date(selectedDate));
+//   }, [selectedDate]);
+
+//   const handleSubmit = (e) => {
+//     e.preventDefault();
+//     const newBudget = {
+//       id: newId,
+//       description,
+//       amount: parseFloat(amount),
+//       date,
+//     };
+//     onExpenseSubmit(newBudget, expense ? expense.id : null);
+//     setDescription("");
+//     setAmount("");
+//     setDate(new Date());
+//   };
+
+//   return (
+//     <>
+//       <form onSubmit={handleSubmit}>
+//         <input
+//           type="text"
+//           placeholder="Enter description..."
+//           value={description}
+//           onChange={(e) => setDescription(e.target.value)}
+//         />
+
+//         <button type="submit">
+//           {expense ? "Update Budget" : "Add Budget"}
+//         </button>
+//       </form>
+//       <ExpenseForm
+//         onExpenseSubmit={onExpenseSubmit}
+//         selectedDate={selectedDate}
+//       />
+//     </>
+//   );
+// }
 
 function CravingForm({ onExpenseSubmit, expense, selectedDate }) {
   const [description, setDescription] = useState("");
@@ -351,9 +442,19 @@ function EmotionLogger({ selectedDate, onEmotionLog }) {
 function EmotionLog({ log, activeTracker, numOfPeriodDays }) {
   return (
     <div>
+      {log.budgets?.length > 0 && (
+        <h2>Budgets for {log.date?.toDateString()}:</h2>
+      )}
+      {log.budgets?.map((note, index) => (
+        <div key={index}>
+          <h2>{note.description}:</h2>
+
+          <p key={index}>{note.budgets}</p>
+        </div>
+      ))}
       {log.notes?.length > 0 && <h2>Notes for {log.date?.toDateString()}:</h2>}
       {log.notes?.map((note, index) => (
-        <div>
+        <div key={index}>
           <h2>{note.description}:</h2>
 
           <p key={index}>{note.notes}</p>
@@ -392,13 +493,186 @@ function EmotionLog({ log, activeTracker, numOfPeriodDays }) {
   );
 }
 
+// function BudgetForm({
+//   onExpenseSubmit,
+//   expense,
+//   selectedDate,
+//   setEmotionLogs,
+//   emotionLogs,
+// }) {
+//   const [boards, setBoards] = useState([]);
+//   const [newBoardTitle, setNewBoardTitle] = useState("");
+//   const [newExpenseTitle, setNewExpenseTitle] = useState("");
+//   const [date, setDate] = useState(new Date());
+//   const newId = useId();
+//   const handleBoardTitleChange = (e) => {
+//     setNewBoardTitle(e.target.value);
+//   };
+
+//   // const handleAddBoard = () => {
+//   //   if (newBoardTitle.trim() !== "") {
+//   //     const newExpense = {
+//   //       id: newId,
+//   //       description: newBoardTitle,
+//   //       lists: [],
+//   //       date,
+//   //     };
+//   //     setBoards([...boards, newExpense]);
+//   //     onExpenseSubmit(newExpense, expense ? expense.id : null);
+//   //     setNewBoardTitle("");
+//   //   }
+//   // };
+
+//   const handleAddBoard = () => {
+//     if (newBoardTitle.trim() !== "") {
+//       const newExpense = {
+//         id: newId,
+//         description: newBoardTitle,
+//         lists: [],
+//         date,
+//       };
+//       setBoards([...boards, newExpense]);
+//       onExpenseSubmit(newExpense, expense ? expense.id : null, boards.length); // Pass the board index as an argument
+//       setNewBoardTitle("");
+//     }
+//   };
+
+//   const handleAddList = (boardIndex, newListTitle) => {
+//     const updatedBoards = [...emotionLogs];
+//     console.log("updatedboards", expense);
+//     // updatedBoards[boardIndex]["budgets"].lists.push({ title: newExpenseTitle });
+//     // updatedBoards[boardIndex]["budgets"][boardIndex].lists.push({
+//     //   title: newExpenseTitle,
+//     // });
+//     // console.log("prev", updatedBoards);
+//     // setEmotionLogs(updatedBoards);
+//   };
+
+//   return (
+//     <div>
+//       <h2>Trello Board</h2>
+
+//       <div>
+//         <input
+//           type="text"
+//           placeholder="Enter board title"
+//           value={newBoardTitle}
+//           onChange={handleBoardTitleChange}
+//         />
+//         <button onClick={handleAddBoard}>Add Board</button>
+//       </div>
+
+//       {boards.map((board, boardIndex) => (
+//         <div key={boardIndex}>
+//           <h3>{board.title}</h3>
+//           <div>
+//             <input
+//               type="text"
+//               placeholder="Enter list title"
+//               value={newExpenseTitle}
+//               onChange={(e) => setNewExpenseTitle(e.target.value)}
+//             />
+//             <button onClick={() => handleAddList(boardIndex)}>Add List</button>
+//           </div>
+
+//           {board.lists.map((list, listIndex) => (
+//             <div key={listIndex}>
+//               <h4>{list.title}</h4>
+//             </div>
+//           ))}
+//         </div>
+//       ))}
+//     </div>
+//   );
+// }
+
+function BudgetForm({
+  onExpenseSubmit,
+  expense,
+  selectedDate,
+  setEmotionLogs,
+  emotionLogs,
+}) {
+  const [boards, setBoards] = useState([]);
+  const [newBoardTitle, setNewBoardTitle] = useState("");
+  const [newListTitle, setNewListTitle] = useState("");
+  const [date, setDate] = useState(new Date());
+  const handleBoardTitleChange = (e) => {
+    setNewBoardTitle(e.target.value);
+  };
+
+  const handleAddBoard = () => {
+    const newExpense = {
+      description: newBoardTitle,
+      lists: [],
+      date,
+    };
+    if (newBoardTitle.trim() !== "") {
+      setBoards([...boards, { title: newBoardTitle, lists: [] }]);
+      onExpenseSubmit(newExpense);
+      setNewBoardTitle("");
+    }
+  };
+
+  const handleAddList = (boardIndex) => {
+    const updatedBoards = [...boards];
+    const updatedExp = [...emotionLogs];
+    updatedBoards[boardIndex].lists.push({ title: newListTitle });
+    console.log(
+      "updated expe",
+      updatedExp,
+      updatedExp[0]["budgets"][boardIndex].lists.push({ title: newListTitle })
+    );
+    setEmotionLogs(updatedExp);
+    setBoards(updatedBoards);
+    setNewListTitle("");
+  };
+
+  console.log("boards", boards);
+
+  return (
+    <div>
+      <h2>Trello Board</h2>
+
+      <div>
+        <input
+          type="text"
+          placeholder="Enter board title"
+          value={newBoardTitle}
+          onChange={handleBoardTitleChange}
+        />
+        <button onClick={handleAddBoard}>Add Board</button>
+      </div>
+
+      {boards.map((board, boardIndex) => (
+        <div key={boardIndex}>
+          <h3>{board.title}</h3>
+          <div>
+            <input
+              type="text"
+              placeholder="Enter list title"
+              value={newListTitle}
+              onChange={(e) => setNewListTitle(e.target.value)}
+            />
+            <button onClick={() => handleAddList(boardIndex)}>Add List</button>
+          </div>
+
+          {board.lists.map((list, listIndex) => (
+            <div key={listIndex}>
+              <h4>{list.title}</h4>
+            </div>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+
 function Trackers() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [emotionLogs, setEmotionLogs] = useState([]);
   const [activeTracker, setActiveTracker] = useState(null);
-  const [expenses, setExpenses] = useState([]);
   const [trackedPeriodDates, setTrackedPeriodDates] = useState([]);
-  const [trackedEmotionDates, setEmotionPeriodDates] = useState([]);
   const [numOfPeriodDays, setNumOfPeriodDays] = useState(0);
 
   const handleDateChange = (date) => {
@@ -458,7 +732,7 @@ function Trackers() {
     }
   };
 
-  const handleExpenseSubmit = (expense, id) => {
+  const handleExpenseSubmit = (expense, id, nestedData) => {
     if (id) {
       // ...
     } else {
@@ -653,6 +927,16 @@ function Trackers() {
             onCravingLog={handleCravingLog}
           />
         );
+      case "budgets":
+        return (
+          <BudgetForm
+            emotionLogs={emotionLogs}
+            setEmotionLogs={setEmotionLogs}
+            onExpenseSubmit={handleExpenseSubmit}
+            selectedDate={selectedDate}
+            onCravingLog={handleCravingLog}
+          />
+        );
       case "period":
         return (
           <PeriodForm
@@ -744,10 +1028,19 @@ function Trackers() {
               className={`category ${
                 activeTracker === "notes" ? "active" : ""
               }`}
-              style={{ background: "violet" }}
+              style={{ background: "blueviolet" }}
               onClick={() => setActiveTracker("notes")}
             >
               Notes
+            </button>
+            <button
+              className={`category ${
+                activeTracker === "budgets" ? "active" : ""
+              }`}
+              style={{ background: "violet" }}
+              onClick={() => setActiveTracker("budgets")}
+            >
+              Budget
             </button>
           </div>
           <div>{trackerFeatures()}</div>
