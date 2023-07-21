@@ -507,29 +507,35 @@ function BudgetExpense({
   const handleBoardTitleChange = (e) => {
     setNewBoardTitle(e.target.value);
   };
+  useEffect(() => {
+    setDate(new Date(selectedDate));
+  }, [selectedDate]);
 
   const handleAddBoard = () => {
     const newExpense = {
       description: newBoardTitle,
       lists: [],
       amount: budgetAmount,
-      date,
+      remaining: 0,
+      date: new Date(),
     };
     if (newBoardTitle.trim() !== "") {
       setBoards([...boards, { title: newBoardTitle, lists: [] }]);
       onExpenseSubmit(newExpense);
       setNewBoardTitle("");
+      setBudgetAmout("");
     }
   };
 
   const handleAddList = (boardIndex) => {
     const updatedBoards = [...boards];
     const updatedExp = [...emotionLogs];
-    updatedBoards[boardIndex].lists.push({ title: newListTitle });
+    // updatedBoards[boardIndex].lists.push({ title: newListTitle });
     console.log(
       "updated expe",
       updatedExp,
       updatedExp[0]["costs"][boardIndex].lists.push({
+        date,
         title: newListTitle,
         amount: expenseAmount,
       })
@@ -537,9 +543,12 @@ function BudgetExpense({
     setEmotionLogs(updatedExp);
     setBoards(updatedBoards);
     setNewListTitle("");
+    setExpenseAmount("");
   };
 
-  console.log("boards", boards);
+  const changeHandler = (date) => {
+    setDate(date);
+  };
 
   return (
     <div>
@@ -562,34 +571,49 @@ function BudgetExpense({
         <button onClick={handleAddBoard}>Add Board</button>
       </div>
 
-      {boards.map((board, boardIndex) => (
-        <div key={boardIndex}>
-          <h3>{board.title}</h3>
-          <p>{budgetAmount.toFixed(2)}</p>
-          <div>
-            <input
-              type="text"
-              placeholder="Enter list title"
-              value={newListTitle}
-              onChange={(e) => setNewListTitle(e.target.value)}
-            />
-            <input
-              type="number"
-              step="0.01"
-              placeholder="Enter your budget..."
-              value={expenseAmount}
-              onChange={(e) => setExpenseAmount(parseFloat(e.target.value))}
-            />
-            <button onClick={() => handleAddList(boardIndex)}>Add List</button>
-          </div>
-
-          {board.lists.map((list, listIndex) => (
-            <div key={listIndex}>
-              <h4>{list.title}</h4>
+      {emotionLogs[0]?.costs.map((board, boardIndex) => {
+        let result = board.lists.reduce((r, d) => r + d.amount, 0);
+        return (
+          <div key={boardIndex}>
+            <h3>
+              {board.description} Budget: {board.amount}{" "}
+            </h3>
+            {board.lists.length > 0 && (
+              <h4>Remaining:{(board.amount - result).toFixed(2)}</h4>
+            )}
+            <div>
+              <input
+                type="text"
+                placeholder="Enter list title"
+                value={newListTitle}
+                onChange={(e) => setNewListTitle(e.target.value)}
+              />
+              <input
+                type="number"
+                step="0.01"
+                placeholder="Enter your budget..."
+                value={expenseAmount}
+                onChange={(e) => setExpenseAmount(parseFloat(e.target.value))}
+              />
+              <div>
+                <label>Date:</label>
+                <DatePicker selected={date} onChange={changeHandler} />
+              </div>
+              <button onClick={() => handleAddList(boardIndex)}>
+                Add List
+              </button>
             </div>
-          ))}
-        </div>
-      ))}
+
+            {board.lists.map((list, listIndex) => {
+              return (
+                <div key={listIndex}>
+                  <h4>{list.title}</h4>
+                </div>
+              );
+            })}
+          </div>
+        );
+      })}
     </div>
   );
 }
@@ -698,19 +722,16 @@ function Trackers() {
       (log) =>
         log.date.toDateString() === formattedDate && log.emotions?.length > 0
     );
-    const hasPeriodLog = emotionLogs.some(
-      (log) =>
-        log.date.toDateString() === formattedDate && log.period?.length > 0
-    );
+
     const hasCravingsLog = emotionLogs.some(
       (log) =>
         log.date.toDateString() === formattedDate && log.cravings?.length > 0
     );
-    const hasPeriodEndLog = emotionLogs.some(
-      (log) =>
-        log.period &&
-        log.period.length > 0 &&
-        log.period[0].endDate === formattedDate
+
+    const hasExpense = emotionLogs[0]?.costs.some((log) =>
+      log.lists.some(
+        (i) => i.date.toDateString() === formattedDate && log.lists?.length > 0
+      )
     );
 
     const hasFullNotes = emotionLogs.some(
@@ -733,6 +754,7 @@ function Trackers() {
         {hasCravingsLog && <div className="period-log-asterisk">🍋</div>}
         {hasFullNotes && <div className="period-log-asterisk">🧾</div>}
         {isBetweenPeriod && <div className="period-log-asterisk">🩸</div>}
+        {hasExpense && <div className="period-log-asterisk">💲</div>}
       </div>
     );
   };
@@ -803,6 +825,7 @@ function Trackers() {
         return (
           <DigestiveLogger
             selectedDate={selectedDate}
+            onExpenseSubmit={handleExpenseSubmit}
             onDigestiveLog={handleDigestiveLog}
           />
         );
