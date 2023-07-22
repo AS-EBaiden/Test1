@@ -123,7 +123,6 @@ function PeriodForm({
   const [enableNotes, setEnableNotes] = useState(false);
   const [amount, setAmount] = useState(1);
   const [date, setDate] = useState(new Date());
-  const [selectedPeriod, setSelectedPeriod] = useState([]);
 
   const today = new Date();
   const daysLater = new Date();
@@ -139,8 +138,6 @@ function PeriodForm({
       description: description || "Period Started",
       isStarted: true,
       endDate: daysLater.toDateString(),
-      // endDate:
-      //   "insert logic that adds your average period days number from when the date of your period started this month ",
       amount: parseFloat(amount),
       date,
     };
@@ -623,7 +620,7 @@ function Trackers() {
   const [emotionLogs, setEmotionLogs] = useState([]);
   const [activeTracker, setActiveTracker] = useState(null);
   const [trackedPeriodDates, setTrackedPeriodDates] = useState([]);
-  const [numOfPeriodDays, setNumOfPeriodDays] = useState(0);
+  const [numOfPeriodDays, setNumOfPeriodDays] = useState(1);
 
   const handleDateChange = (date) => {
     setSelectedDate(date);
@@ -728,7 +725,7 @@ function Trackers() {
         log.date.toDateString() === formattedDate && log.cravings?.length > 0
     );
 
-    const hasExpense = emotionLogs[0]?.costs.some((log) =>
+    const hasExpense = emotionLogs[0]?.costs?.some((log) =>
       log.lists.some(
         (i) => i.date.toDateString() === formattedDate && log.lists?.length > 0
       )
@@ -743,14 +740,14 @@ function Trackers() {
       (trackedDate) =>
         new Date(trackedDate) <= date &&
         new Date(trackedDate).setDate(
-          new Date(trackedDate).getDate() + numOfPeriodDays
+          new Date(trackedDate).getDate() + numOfPeriodDays - 1
+          // (numOfPeriodDays > 1 ? numOfPeriodDays - 1 : numOfPeriodDays)
         ) >= date
     );
 
     return (
       <div style={{ display: "flex", placeContent: "center" }}>
         {hasEmotionLog && <div className="emotion-log-asterisk">🥰</div>}
-        {/* {hasPeriodLog && <div className="period-log-asterisk">🍊</div>}*/}
         {hasCravingsLog && <div className="period-log-asterisk">🍋</div>}
         {hasFullNotes && <div className="period-log-asterisk">🧾</div>}
         {isBetweenPeriod && <div className="period-log-asterisk">🩸</div>}
