@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useId } from "react";
+import React, { useState, useEffect } from "react";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
 import { Calendar as ReactCalendar } from "react-calendar";
@@ -116,13 +116,14 @@ function PeriodForm({
   onExpenseSubmit,
   expense,
   selectedDate,
-  numOfPeriodDays,
-  setNumOfPeriodDays,
+  // numOfPeriodDays,
+  // setNumOfPeriodDays,
 }) {
   const [description, setDescription] = useState("");
   const [enableNotes, setEnableNotes] = useState(false);
   const [amount, setAmount] = useState(1);
   const [date, setDate] = useState(new Date());
+  const [numOfPeriodDays, setNumOfPeriodDays] = useState(1);
 
   const today = new Date();
   const daysLater = new Date();
@@ -138,12 +139,14 @@ function PeriodForm({
       description: description || "Period Started",
       isStarted: true,
       endDate: daysLater.toDateString(),
-      amount: parseFloat(amount),
+      painLevel: parseFloat(amount),
+      periodDays: numOfPeriodDays,
       date,
     };
     onExpenseSubmit(newExpense, expense ? expense.id : null);
     setDescription("");
-    setAmount("");
+    setAmount(1);
+    setNumOfPeriodDays(1);
     setDate(new Date());
     setEnableNotes(false);
   };
@@ -398,9 +401,14 @@ function EmotionLog({ log, activeTracker, numOfPeriodDays }) {
         <div key={index}>
           <p>
             {" "}
-            {pd.isStarted} {pd.description} - Pain Level: {pd.amount}
+            {pd.isStarted} {pd.description} - Pain Level: {pd.painLevel}
           </p>
-          <p>Period Duration: {numOfPeriodDays} Days</p>
+          <p>
+            Period Duration:
+            {pd.painLevel}
+            {/* {numOfPeriodDays}  */}
+            Days
+          </p>
         </div>
       ))}
     </div>
@@ -452,7 +460,7 @@ function BudgetForm({
 
   return (
     <div>
-      <h2>Trello Board</h2>
+      <h2>Board Budget</h2>
 
       <div>
         <input
@@ -568,7 +576,7 @@ function BudgetExpense({
         <button onClick={handleAddBoard}>Add Board</button>
       </div>
 
-      {emotionLogs[0]?.costs.map((board, boardIndex) => {
+      {emotionLogs[0]?.costs?.map((board, boardIndex) => {
         let result = board.lists.reduce((r, d) => r + d.amount, 0);
         return (
           <div key={boardIndex}>
@@ -736,21 +744,41 @@ function Trackers() {
         log.date.toDateString() === formattedDate && log.notes?.length > 0
     );
 
-    const isBetweenPeriod = trackedPeriodDates.some(
-      (trackedDate) =>
-        new Date(trackedDate) <= date &&
-        new Date(trackedDate).setDate(
-          new Date(trackedDate).getDate() + numOfPeriodDays - 1
-          // (numOfPeriodDays > 1 ? numOfPeriodDays - 1 : numOfPeriodDays)
+    const testerino = emotionLogs?.some((i, j) => {
+      // let bro = i?.period.map(() => trackedPeriodDates[j]);
+      let bro = trackedPeriodDates[j];
+
+      return (
+        new Date(bro) <= date &&
+        new Date(bro).setDate(
+          new Date(bro).getDate() + (i.period[0]?.periodDays - 1)
         ) >= date
-    );
+      );
+    });
+
+    // const isBetweenPeriod = trackedPeriodDates.some(
+    //   (trackedDate) =>
+    //     new Date(trackedDate) <= date &&
+    //     new Date(trackedDate).setDate(
+    //       new Date(trackedDate).getDate() + numOfPeriodDays - 1
+    //     ) >= date
+    // );
+
+    // trackedPeriodDates.some(
+    //   (trackedDate) =>
+    //     new Date(trackedDate) <= date &&
+    //  is   new Date(trackedDate).setDate(
+    //       new Date(trackedDate).getDate() + numOfPeriodDays - 1
+    //       // (numOfPeriodDays > 1 ? numOfPeriodDays - 1 : numOfPeriodDays)
+    //     ) >= date
+    // );
 
     return (
       <div style={{ display: "flex", placeContent: "center" }}>
         {hasEmotionLog && <div className="emotion-log-asterisk">🥰</div>}
         {hasCravingsLog && <div className="period-log-asterisk">🍋</div>}
         {hasFullNotes && <div className="period-log-asterisk">🧾</div>}
-        {isBetweenPeriod && <div className="period-log-asterisk">🩸</div>}
+        {testerino && <div className="period-log-asterisk">🩸</div>}
         {hasExpense && <div className="period-log-asterisk">💲</div>}
       </div>
     );
