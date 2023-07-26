@@ -623,13 +623,107 @@ function BudgetExpense({
   );
 }
 
+function Profile({ setBoards, boards }) {
+  // const [boards, setBoards] = useState([]);
+  const [newBoardTitle, setNewBoardTitle] = useState("");
+  const [newListTitle, setNewListTitle] = useState("");
+  const [date, setDate] = useState(new Date());
+  const [budgetAmount, setBudgetAmout] = useState(0);
+  const [expenseAmount, setExpenseAmount] = useState(0);
+  const [gender, setGender] = useState("famale");
+  const [age, setAge] = useState(18);
+  const handleBoardTitleChange = (e) => {
+    setNewBoardTitle(e.target.value);
+  };
+
+  const handleAddBoard = () => {
+    const newExpense = {
+      description: newBoardTitle,
+      age,
+      gender,
+    };
+    setBoards([...boards, newExpense]);
+    setNewBoardTitle("");
+    setBudgetAmout("");
+  };
+
+  const handleAddList = (boardIndex) => {
+    const updatedBoards = [...boards];
+    const updatedExp = [...boards];
+    // updatedBoards[boardIndex].lists.push({ title: newListTitle });
+    console.log(
+      "updated expe",
+      updatedExp,
+      updatedExp[0]["costs"][boardIndex].lists.push({
+        date,
+        title: newListTitle,
+        amount: expenseAmount,
+      })
+    );
+    // setEmotionLogs(updatedExp);
+    setBoards(updatedBoards);
+    setNewListTitle("");
+    setExpenseAmount("");
+  };
+
+  const changeHandler = (date) => {
+    setDate(date);
+  };
+
+  console.log("hayyy", boards);
+
+  return (
+    <div>
+      <h2>Trello Board</h2>
+
+      <div>
+        {/* <input
+          type="text"
+          placeholder="Enter board title"
+          value={newBoardTitle}
+          onChange={handleBoardTitleChange}
+        /> */}
+        <input
+          type="text"
+          placeholder="Gender"
+          value={gender}
+          onChange={(e) => setGender(e.target.value)}
+        />
+        <input
+          type="number"
+          step="0.01"
+          placeholder="Enter your Age..."
+          value={age}
+          onChange={(e) => setAge(parseFloat(e.target.value))}
+        />
+        <button onClick={handleAddBoard}>Add Board</button>
+      </div>
+
+      <div>
+        {boards.map((list, listIndex) => {
+          return (
+            <div key={listIndex}>
+              <p>
+                {" "}
+                I am a {list.age} {list.gender}{" "}
+              </p>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 function Trackers() {
   const [selectedDate, setSelectedDate] = useState(new Date());
   const [emotionLogs, setEmotionLogs] = useState([]);
   const [activeTracker, setActiveTracker] = useState(null);
   const [trackedPeriodDates, setTrackedPeriodDates] = useState([]);
   const [numOfPeriodDays, setNumOfPeriodDays] = useState(1);
-
+  const [boards, setBoards] = useState([]);
+  const [textToAI, setTextToAI] = useState("");
+  const [profile, setProfile] = useState(null);
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
@@ -793,6 +887,8 @@ function Trackers() {
 
   const trackerFeatures = () => {
     switch (activeTracker) {
+      case "profile":
+        return <Profile boards={boards} setBoards={setBoards} />;
       case "emotion":
         return (
           <EmotionLogger
@@ -942,6 +1038,15 @@ function Trackers() {
             >
               Costs
             </button>
+            <button
+              className={`category ${
+                activeTracker === "profile" ? "active" : ""
+              }`}
+              style={{ background: "lightgrey" }}
+              onClick={() => setActiveTracker("profile")}
+            >
+              Profile
+            </button>
           </div>
           <div>{trackerFeatures()}</div>
         </div>
@@ -957,6 +1062,18 @@ function Trackers() {
         ))}
       </div>
       {/* ... */}
+      <div>
+        {boards?.map((list, listIndex) => {
+          return (
+            <div key={listIndex}>
+              <p>
+                {" "}
+                I am a {list.age} year old {list.gender}
+              </p>
+            </div>
+          );
+        })}
+      </div>
     </div>
   );
 }
