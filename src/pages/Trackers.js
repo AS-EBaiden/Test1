@@ -394,7 +394,7 @@ function EmotionLog({ log, activeTracker, numOfPeriodDays }) {
         </p>
       ))}
 
-      {log.period?.length > 0 && (
+      {/* {log.period?.length > 0 && (
         <h2>Period Log for {log.date?.toDateString()}:</h2>
       )}
       {log.period?.map((pd, index) => (
@@ -406,11 +406,26 @@ function EmotionLog({ log, activeTracker, numOfPeriodDays }) {
           <p>
             Period Duration:
             {pd.painLevel}
-            {/* {numOfPeriodDays}  */}
             Days
           </p>
         </div>
-      ))}
+      ))} */}
+
+      {log.period && <h2>Period Log for {log.date?.toDateString()}:</h2>}
+      {log.period && (
+        <div>
+          <p>
+            {" "}
+            {log.period.isStarted} {log.period.description} - Pain Level:{" "}
+            {log.period.painLevel}
+          </p>
+          <p>
+            Period Duration:
+            {log.period.painLevel}
+            Days
+          </p>
+        </div>
+      )}
     </div>
   );
 }
@@ -724,6 +739,7 @@ function Trackers() {
   const [boards, setBoards] = useState([]);
   const [textToAI, setTextToAI] = useState("");
   const [profile, setProfile] = useState(null);
+  const [trackedPeriodFrame, setTrackedPeriodFrame] = useState([]);
   const handleDateChange = (date) => {
     setSelectedDate(date);
   };
@@ -786,9 +802,13 @@ function Trackers() {
       // ...
     } else {
       const formattedDate = expense.date.toDateString();
+      const numpddays = expense.periodDays;
+      const trackedData = { formattedDate, numpddays };
+      console.log("bailey", trackedData);
 
       if (activeTracker === "period") {
         setTrackedPeriodDates((prevDates) => [...prevDates, formattedDate]);
+        setTrackedPeriodFrame((prev) => [...prev, trackedData]);
       }
 
       const existingLogIndex = emotionLogs.findIndex(
@@ -804,16 +824,19 @@ function Trackers() {
         }
         setEmotionLogs(updatedLogs);
       } else {
+        let keyWord = activeTracker === "period" ? expense : [expense];
         setEmotionLogs([
           ...emotionLogs,
           {
             date: expense.date,
-            [activeTracker]: [expense],
+            [activeTracker]: keyWord,
           },
         ]);
       }
     }
   };
+
+  console.log("ttoo", trackedPeriodFrame);
 
   const tileContent = ({ date }) => {
     const formattedDate = date.toDateString();
@@ -838,41 +861,22 @@ function Trackers() {
         log.date.toDateString() === formattedDate && log.notes?.length > 0
     );
 
-    const testerino = emotionLogs?.some((i, j) => {
-      // let bro = i?.period.map(() => trackedPeriodDates[j]);
-      let bro = trackedPeriodDates[j];
-
-      return (
-        new Date(bro) <= date &&
-        new Date(bro).setDate(
-          new Date(bro).getDate() + (i.period[0]?.periodDays - 1)
+    const inbetween = trackedPeriodFrame.some(
+      (trackedDate) =>
+        new Date(trackedDate.formattedDate) <= date &&
+        new Date(trackedDate.formattedDate).setDate(
+          new Date(trackedDate.formattedDate).getDate() +
+            trackedDate.numpddays -
+            1
         ) >= date
-      );
-    });
-
-    // const isBetweenPeriod = trackedPeriodDates.some(
-    //   (trackedDate) =>
-    //     new Date(trackedDate) <= date &&
-    //     new Date(trackedDate).setDate(
-    //       new Date(trackedDate).getDate() + numOfPeriodDays - 1
-    //     ) >= date
-    // );
-
-    // trackedPeriodDates.some(
-    //   (trackedDate) =>
-    //     new Date(trackedDate) <= date &&
-    //  is   new Date(trackedDate).setDate(
-    //       new Date(trackedDate).getDate() + numOfPeriodDays - 1
-    //       // (numOfPeriodDays > 1 ? numOfPeriodDays - 1 : numOfPeriodDays)
-    //     ) >= date
-    // );
+    );
 
     return (
       <div style={{ display: "flex", placeContent: "center" }}>
         {hasEmotionLog && <div className="emotion-log-asterisk">🥰</div>}
         {hasCravingsLog && <div className="period-log-asterisk">🍋</div>}
         {hasFullNotes && <div className="period-log-asterisk">🧾</div>}
-        {testerino && <div className="period-log-asterisk">🩸</div>}
+        {inbetween && <div className="period-log-asterisk">🩸</div>}
         {hasExpense && <div className="period-log-asterisk">💲</div>}
       </div>
     );
