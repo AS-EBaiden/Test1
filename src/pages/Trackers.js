@@ -201,7 +201,7 @@ function PeriodForm({
     </form>
   );
 }
-function DigestiveLogger({ selectedDate, onDigestiveLog }) {
+function DigestiveLogger({ onExpenseSubmit, selectedDate, onDigestiveLog }) {
   const [selectedDigestives, setSelectedDigestives] = useState([]);
 
   const handleDigestiveToggle = (digest) => {
@@ -222,9 +222,14 @@ function DigestiveLogger({ selectedDate, onDigestiveLog }) {
       prevdigests.map((e) => (e.name === digest ? { ...e, level: level } : e))
     );
   };
+  let newExpense = {
+    date: selectedDate,
+    ...selectedDigestives[0],
+  };
 
   const handleDigestLog = () => {
-    onDigestiveLog(selectedDate, selectedDigestives);
+    // onDigestiveLog(selectedDate, selectedDigestives);
+    onExpenseSubmit(newExpense);
     setSelectedDigestives([]);
   };
 
@@ -861,6 +866,11 @@ function Trackers() {
         log.date.toDateString() === formattedDate && log.notes?.length > 0
     );
 
+    const hasDigestive = emotionLogs.some(
+      (log) =>
+        log.date.toDateString() === formattedDate && log.digestive?.length > 0
+    );
+
     const inbetween = trackedPeriodFrame.some(
       (trackedDate) =>
         new Date(trackedDate.formattedDate) <= date &&
@@ -877,6 +887,7 @@ function Trackers() {
         {hasCravingsLog && <div className="period-log-asterisk">🍋</div>}
         {hasFullNotes && <div className="period-log-asterisk">🧾</div>}
         {inbetween && <div className="period-log-asterisk">🩸</div>}
+        {hasDigestive && <div className="period-log-asterisk">💩</div>}
         {hasExpense && <div className="period-log-asterisk">💲</div>}
       </div>
     );
