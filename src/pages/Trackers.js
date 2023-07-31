@@ -575,6 +575,8 @@ function BudgetExpense({
     setDate(date);
   };
 
+  console.log("emotioninyyyyy", emotionLogs);
+
   return (
     <div>
       <h2>Trello Board</h2>
@@ -596,7 +598,53 @@ function BudgetExpense({
         <button onClick={handleAddBoard}>Add Board</button>
       </div>
 
-      {emotionLogs[0]?.costs?.map((board, boardIndex) => {
+      {emotionLogs.map((a, b) => {
+        return a.costs?.map((board, boardIndex) => {
+          let result = board.lists.reduce((r, d) => r + d.amount, 0);
+          return (
+            <div key={boardIndex}>
+              <h3>
+                {board.description} Budget: {board.amount}{" "}
+              </h3>
+              {board.lists.length > 0 && (
+                <h4>Remaining:{(board.amount - result).toFixed(2)}</h4>
+              )}
+              <div>
+                <input
+                  type="text"
+                  placeholder="Enter list title"
+                  value={newListTitle}
+                  onChange={(e) => setNewListTitle(e.target.value)}
+                />
+                <input
+                  type="number"
+                  step="0.01"
+                  placeholder="Enter your budget..."
+                  value={expenseAmount}
+                  onChange={(e) => setExpenseAmount(parseFloat(e.target.value))}
+                />
+                <div>
+                  <label>Date:</label>
+                  <DatePicker selected={date} onChange={changeHandler} />
+                </div>
+                <button onClick={() => handleAddList(boardIndex)}>
+                  Add List
+                </button>
+              </div>
+
+              {board.lists.map((list, listIndex) => {
+                return (
+                  <div key={listIndex}>
+                    <h4>{list.title}</h4>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        });
+      })}
+
+      {/* {emotionLogs[0]?.costs?.map((board, boardIndex) => {
         let result = board.lists.reduce((r, d) => r + d.amount, 0);
         return (
           <div key={boardIndex}>
@@ -638,7 +686,7 @@ function BudgetExpense({
             })}
           </div>
         );
-      })}
+      })} */}
     </div>
   );
 }
