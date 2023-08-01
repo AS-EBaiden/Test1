@@ -556,15 +556,16 @@ function BudgetExpense({
     const updatedBoards = [...boards];
     const updatedExp = [...emotionLogs];
     // updatedBoards[boardIndex].lists.push({ title: newListTitle });
-    console.log(
-      "updated expe",
-      updatedExp,
-      updatedExp[0]["costs"][boardIndex].lists.push({
-        date,
-        title: newListTitle,
-        amount: expenseAmount,
-      })
-    );
+    updatedExp[0]["costs"][boardIndex].lists.push({
+      date,
+      title: newListTitle,
+      amount: expenseAmount,
+    });
+    // console.log(
+    //   "updated expe",
+    //   updatedExp,
+
+    // );
     setEmotionLogs(updatedExp);
     setBoards(updatedBoards);
     setNewListTitle("");
@@ -574,8 +575,6 @@ function BudgetExpense({
   const changeHandler = (date) => {
     setDate(date);
   };
-
-  console.log("emotioninyyyyy", emotionLogs);
 
   return (
     <div>
@@ -857,7 +856,6 @@ function Trackers() {
       const formattedDate = expense.date.toDateString();
       const numpddays = expense.periodDays;
       const trackedData = { formattedDate, numpddays };
-      console.log("bailey", trackedData);
 
       if (activeTracker === "period") {
         setTrackedPeriodDates((prevDates) => [...prevDates, formattedDate]);
@@ -888,8 +886,6 @@ function Trackers() {
       }
     }
   };
-
-  console.log("ttoo", trackedPeriodFrame);
 
   const tileContent = ({ date }) => {
     const formattedDate = date.toDateString();
