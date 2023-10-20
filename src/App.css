@@ -2,6 +2,10 @@
   text-align: center;
 }
 
+.disabled{
+  /* opacity: 0.7; */
+}
+
 .App-logo {
   height: 40vmin;
   pointer-events: none;

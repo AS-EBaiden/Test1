@@ -5,10 +5,7 @@ import Demo from "./pages/Demo";
 import Emotion from "./pages/Emotion";
 import Trackers from "./pages/Trackers";
 import "./App.css";
-
-function HomePage() {
-  return <div className="page">🏠 Page</div>;
-}
+import Home from "./pages/LifeTap/Home";
 
 export default function App() {
   return (
@@ -48,7 +45,7 @@ export default function App() {
         </Link> */}
       </div>
       <Routes>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/" element={<Home />} />
         <Route path="/demo" element={<Demo />} />
         <Route path="/calendar" element={<Calendar />} />
         <Route path="/emotion" element={<Emotion />} />
